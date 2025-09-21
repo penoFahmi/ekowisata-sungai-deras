@@ -9,7 +9,8 @@ import AuthLayout from '@/layouts/auth-layout';
 import { register } from '@/routes';
 import { request } from '@/routes/password';
 import { Form, Head } from '@inertiajs/react';
-import { LoaderCircle } from 'lucide-react';
+import { Eye, EyeOff, LoaderCircle } from 'lucide-react';
+import { useState } from 'react';
 
 interface LoginProps {
     status?: string;
@@ -17,6 +18,7 @@ interface LoginProps {
 }
 
 export default function Login({ status, canResetPassword }: LoginProps) {
+    const [showPassword, setShowPassword] = useState(false);
     return (
         <AuthLayout
             title="Log in to your account"
@@ -47,7 +49,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                 <InputError message={errors.email} />
                             </div>
 
-                            <div className="grid gap-2">
+                            <div className="relative grid gap-2">
                                 <div className="flex items-center">
                                     <Label htmlFor="password">Password</Label>
                                     {canResetPassword && (
@@ -60,15 +62,34 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                         </TextLink>
                                     )}
                                 </div>
-                                <Input
-                                    id="password"
-                                    type="password"
-                                    name="password"
-                                    required
-                                    tabIndex={2}
-                                    autoComplete="current-password"
-                                    placeholder="Password"
-                                />
+                                <div className="relative">
+                                    <Input
+                                        id="password"
+                                        type={
+                                            showPassword ? 'text' : 'password'
+                                        }
+                                        name="password"
+                                        required
+                                        tabIndex={2}
+                                        autoComplete="current-password"
+                                        placeholder="Password"
+                                        className="pr-10"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setShowPassword(!showPassword)
+                                        }
+                                        className="absolute top-1/2 right-2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                        tabIndex={-1}
+                                    >
+                                        {showPassword ? (
+                                            <EyeOff size={18} />
+                                        ) : (
+                                            <Eye size={18} />
+                                        )}
+                                    </button>
+                                </div>
                                 <InputError message={errors.password} />
                             </div>
 
