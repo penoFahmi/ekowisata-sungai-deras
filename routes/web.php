@@ -5,7 +5,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\Admin\UserController;
 
 Route::get('/', function () {
-    return Inertia::render('welcome');
+    return Inertia::render('App');
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
