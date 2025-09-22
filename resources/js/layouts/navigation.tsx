@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "../components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "../components/ui/sheet";
-import { Menu, MapPin, Home, Store, Calendar, BookOpen } from "lucide-react";
+import { Menu, MapPin, Home, Store, Calendar, User } from "lucide-react";
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -11,7 +11,7 @@ export function Navigation() {
     { href: "#map", label: "Peta Wisata", icon: MapPin },
     { href: "#umkm", label: "UMKM", icon: Store },
     { href: "#events", label: "Agenda", icon: Calendar },
-    { href: "#articles", label: "Artikel", icon: BookOpen },
+    { href: "#login", label: "Login", icon: User },
   ];
 
   const handleNavClick = (href: string) => {
