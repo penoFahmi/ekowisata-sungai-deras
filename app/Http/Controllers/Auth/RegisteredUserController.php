@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
+use App\Models\Role;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -42,10 +43,18 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
+        $visitorRole = Role::where('name', 'user-terdaftar')->first();
+
+        if ($visitorRole) {
+            $user->roles()->attach($visitorRole->id);
+        }
+
         event(new Registered($user));
 
         Auth::login($user);
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        // --- PERBAIKAN 2: Arahkan ke halaman yang benar ---
+        // Redirect ke halaman home, bukan dashboard.
+        return redirect()->route('home')->with('success', 'Pendaftaran berhasil! Selamat datang.');
     }
 }

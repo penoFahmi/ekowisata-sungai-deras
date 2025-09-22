@@ -45,7 +45,18 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        // return redirect()->intended(route('dashboard', absolute: false));
+
+        $loggedInUser = $request->user();
+        // Cek perannya dan arahkan ke halaman yang sesuai
+        if ($loggedInUser->hasRole('administrator') || $loggedInUser->hasRole('pengelola-wisata') || $loggedInUser->hasRole('pengelola-umkm') || $loggedInUser->hasRole('pengelola-sig')) {
+            // Jika dia adalah salah satu dari peran admin, arahkan ke dashboard admin
+            return redirect()->intended(route('dashboard'));
+        }
+
+        // Jika tidak, berarti dia adalah 'user-terdaftar'
+        return redirect()->intended(route('home'));
+        // --- SELESAI PERBAIKAN ---
     }
 
     /**
