@@ -2,16 +2,37 @@ import { useState } from "react";
 import { Button } from "../components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "../components/ui/sheet";
 import { Menu, MapPin, Home, Store, Calendar, User } from "lucide-react";
+import { login } from "@/routes";
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
 
   const navItems = [
-    { href: "#home", label: "Beranda", icon: Home },
-    { href: "#map", label: "Peta Wisata", icon: MapPin },
-    { href: "#umkm", label: "UMKM", icon: Store },
-    { href: "#events", label: "Agenda", icon: Calendar },
-    { href: "#login", label: "Login", icon: User },
+    {
+        href: "#home",
+        label: "Beranda",
+        icon: Home
+    },
+    {
+        href: "#map",
+        label: "Peta Wisata",
+        icon: MapPin
+    },
+    {
+        href: "#umkm",
+        label: "UMKM",
+        icon: Store
+    },
+    {
+        href: "#events",
+        label: "Agenda",
+        icon: Calendar
+    },
+    {
+        href: login(),
+        label: "Login",
+        icon: User
+    },
   ];
 
   const handleNavClick = (href: string) => {

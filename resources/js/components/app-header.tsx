@@ -29,10 +29,10 @@ import {
 import { UserMenuContent } from '@/components/user-menu-content';
 import { useInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
-import { dashboard } from '@/routes';
+import { dashboard, kategori, user, wisata, umkm, agenda, setting} from '@/routes';
 import { type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, Menu, Search } from 'lucide-react';
+import { BookOpen, Calendar, Folder, FolderOpen, LayoutGrid, MapPin, Menu, Search, Settings, Store, Users } from 'lucide-react';
 import AppLogo from './app-logo';
 import AppLogoIcon from './app-logo-icon';
 
@@ -41,6 +41,36 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: dashboard(),
         icon: LayoutGrid,
+    },
+        {
+        title: 'Manajemen User',
+        href: user(),
+        icon: Users,
+    },
+        {
+        title: 'Manajemen Kategori',
+        href: kategori(),
+        icon: FolderOpen,
+    },
+        {
+        title: 'Manajemen Wisata',
+        href: wisata(),
+        icon: MapPin,
+    },
+        {
+        title: 'Manajemen UMKM',
+        href: umkm(),
+        icon: Store,
+    },
+        {
+        title: 'Manajemen Agenda',
+        href: agenda(),
+        icon: Calendar,
+    },
+        {
+        title: 'Pengaturan',
+        href: setting(),
+        icon: Settings,
     },
 ];
 

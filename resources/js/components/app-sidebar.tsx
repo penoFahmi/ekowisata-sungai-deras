@@ -1,4 +1,3 @@
-import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import {
@@ -10,10 +9,10 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
+import { dashboard, user, kategori, wisata, umkm, agenda, setting } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
+import { Users, FolderOpen, LayoutGrid, MapPin, Settings, Calendar, Store } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -22,18 +21,35 @@ const mainNavItems: NavItem[] = [
         href: dashboard(),
         icon: LayoutGrid,
     },
-];
-
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: Folder,
+        {
+        title: 'Manajemen User',
+        href: user(),
+        icon: Users,
     },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
+        {
+        title: 'Manajemen Kategori',
+        href: kategori(),
+        icon: FolderOpen,
+    },
+        {
+        title: 'Manajemen Wisata',
+        href: wisata(),
+        icon: MapPin,
+    },
+        {
+        title: 'Manajemen UMKM',
+        href: umkm(),
+        icon: Store,
+    },
+        {
+        title: 'Manajemen Agenda',
+        href: agenda(),
+        icon: Calendar,
+    },
+        {
+        title: 'Pengaturan',
+        href: setting(),
+        icon: Settings,
     },
 ];
 
@@ -57,7 +73,6 @@ export function AppSidebar() {
             </SidebarContent>
 
             <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
                 <NavUser />
             </SidebarFooter>
         </Sidebar>
