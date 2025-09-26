@@ -15,27 +15,10 @@ Route::get('/', function () {
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    // Route::get('dashboard', function () {
-    //     return Inertia::render('dashboard/dashboard');
-    // })->name('dashboard');
-    // Route::get('users', function () {
-    //     return Inertia::render('dashboard/user');
-    // })->name('users');
-    // Route::get('kategori', function () {
-    //     return Inertia::render('dashboard/kategori');
-    // })->name('kategori');
-    // Route::get('wisata', function () {
-    //     return Inertia::render('dashboard/wisata');
-    // })->name('wisata');
-    // Route::get('umkm', function () {
-    //     return Inertia::render('dashboard/umkm');
-    // })->name('umkm');
-    // Route::get('agenda', function () {
-    //     return Inertia::render('dashboard/agenda');
-    // })->name('agenda');
-    // Route::get('setting', function () {
-    //     return Inertia::render('dashboard/setting');
-    // })->name('setting');
+    Route::get('dashboard', function () {
+        return Inertia::render('dashboard/dashboard');
+    })->name('dashboard');
+
 
     // GUNAKAN GRUP INI UNTUK SEMUA FITUR ADMIN
     Route::prefix('admin')
