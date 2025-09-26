@@ -7,7 +7,7 @@ import { Head } from '@inertiajs/react';
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Manajemen UMKM',
-        href: umkm().url,
+        href: '/umkm',
     },
 ];
 

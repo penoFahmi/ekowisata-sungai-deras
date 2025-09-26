@@ -25,7 +25,7 @@ class CategoryController extends Controller
      */
     public function create()
     {
-        return Inertia::render('Admin/Categories/Create');
+        return Inertia::render('dashboard/kategori/create');
     }
 
     /**
@@ -34,7 +34,7 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:categories,name',
             'type' => ['required', Rule::in(['wisata', 'umkm'])],
         ]);
 
@@ -45,25 +45,24 @@ class CategoryController extends Controller
 
     /**
      * Menampilkan form untuk mengedit kategori.
-     *
-     * @param  \App\Models\Category  $category
      */
     public function edit(Category $category)
     {
-        return Inertia::render('Admin/Categories/Edit', [
+        return Inertia::render('dashboard/kategori/edit', [
             'category' => $category,
         ]);
     }
 
     /**
      * Memperbarui data kategori di database.
-     *
-     * @param  \App\Models\Category  $category
      */
     public function update(Request $request, Category $category)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => [
+                'required', 'string', 'max:255',
+                Rule::unique('categories', 'name')->ignore($category->id)
+            ],
             'type' => ['required', Rule::in(['wisata', 'umkm'])],
         ]);
 
@@ -74,11 +73,11 @@ class CategoryController extends Controller
 
     /**
      * Menghapus kategori dari database.
-     *
-     * @param  \App\Models\Category  $category
      */
     public function destroy(Category $category)
     {
+        // Jika ingin mencegah penghapusan kategori yang masih digunakan, tambahkan pengecekan di sini
+
         $category->delete();
 
         return redirect()->route('admin.categories.index')->with('success', 'Kategori berhasil dihapus.');

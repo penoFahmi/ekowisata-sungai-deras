@@ -26,39 +26,39 @@ import AppLogo from './app-logo';
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
-        href: '/admin/dashboard',
+        href: '/dashboard',
         icon: LayoutGrid,
     },
     {
         title: 'Manajemen User',
-        href: '/admin/users',
+        href: '/users',
         icon: Users,
     },
-        {
+    {
         title: 'Manajemen Kategori',
-        href: '/admin/kategori',
+        href: '/kategori',
         icon: FolderOpen,
     },
-        {
+    {
         title: 'Manajemen Wisata',
-        href: '/admin/wisata',
+        href: '/wisata',
         icon: MapPin,
     },
-        {
-        title: 'Manajemen UMKM',
-        href: '/admin/umkm',
-        icon: Store,
-    },
-        {
-        title: 'Manajemen Agenda',
-        href: '/admin/agenda',
-        icon: Calendar,
-    },
-        {
-        title: 'Pengaturan',
-        href: '/admin/setting',
-        icon: Settings,
-    },
+    // {
+    //     title: 'Manajemen UMKM',
+    //     href: '/umkm',
+    //     icon: Store,
+    // },
+    // {
+    //     title: 'Manajemen Agenda',
+    //     href: '/agenda',
+    //     icon: Calendar,
+    // },
+    // {
+    //     title: 'Pengaturan',
+    //     href: '/setting',
+    //     icon: Settings,
+    // },
 ];
 
 export function AppSidebar() {
@@ -68,7 +68,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href={'/admin/dashboard'} prefetch>
+                            <Link href={'/dashboard'} prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>

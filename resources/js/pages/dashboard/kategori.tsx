@@ -1,13 +1,13 @@
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AppLayout from '@/layouts/app-layout';
-import { kategori } from '@/routes';
+// import { kategori } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Manajemen Kategori',
-        href: kategori().url,
+        href: '/kategori',
     },
 ];
 

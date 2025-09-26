@@ -29,7 +29,7 @@ import {
 import { UserMenuContent } from '@/components/user-menu-content';
 import { useInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
-import { dashboard, kategori, users, wisata, umkm, agenda, setting} from '@/routes';
+// import { dashboard, kategori, users, wisata, umkm, agenda, setting} from '@/routes';
 import { type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { BookOpen, Calendar, Folder, FolderOpen, LayoutGrid, MapPin, Menu, Search, Settings, Store, Users } from 'lucide-react';
@@ -39,39 +39,39 @@ import AppLogoIcon from './app-logo-icon';
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
-        href: dashboard(),
+        href: '/dashboard',
         icon: LayoutGrid,
     },
-        {
+    {
         title: 'Manajemen User',
-        href: users(),
+        href: '/users',
         icon: Users,
     },
-        {
+    {
         title: 'Manajemen Kategori',
-        href: kategori(),
+        href:  '/kategori',
         icon: FolderOpen,
     },
-        {
+    {
         title: 'Manajemen Wisata',
-        href: wisata(),
+        href: '/wisata',
         icon: MapPin,
     },
-        {
-        title: 'Manajemen UMKM',
-        href: umkm(),
-        icon: Store,
-    },
-        {
-        title: 'Manajemen Agenda',
-        href: agenda(),
-        icon: Calendar,
-    },
-        {
-        title: 'Pengaturan',
-        href: setting(),
-        icon: Settings,
-    },
+    // {
+    //     title: 'Manajemen UMKM',
+    //     href: '/umkm',
+    //     icon: Store,
+    // },
+    // {
+    //     title: 'Manajemen Agenda',
+    //     href: '/agenda',
+    //     icon: Calendar,
+    // },
+    // {
+    //     title: 'Pengaturan',
+    //     href: '/setting',
+    //     icon: Settings,
+    // },
 ];
 
 const rightNavItems: NavItem[] = [
@@ -175,7 +175,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                     </div>
 
                     <Link
-                        href={dashboard()}
+                        href={'/dashboard'}
                         prefetch
                         className="flex items-center space-x-2"
                     >

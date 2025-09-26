@@ -1,13 +1,13 @@
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AppLayout from '@/layouts/app-layout';
-import { setting } from '@/routes';
+// import { setting } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Pengaturan',
-        href: setting().url,
+        href: '/setting',
     },
 ];
 

@@ -1,13 +1,13 @@
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AppLayout from '@/layouts/app-layout';
-import { wisata } from '@/routes';
+// import { wisata } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Manajemen Wisata',
-        href: wisata().url,
+        href: '/wisata',
     },
 ];
 
