@@ -29,7 +29,7 @@ import {
 import { UserMenuContent } from '@/components/user-menu-content';
 import { useInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
-import { dashboard, kategori, user, wisata, umkm, agenda, setting} from '@/routes';
+import { dashboard, kategori, users, wisata, umkm, agenda, setting} from '@/routes';
 import { type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { BookOpen, Calendar, Folder, FolderOpen, LayoutGrid, MapPin, Menu, Search, Settings, Store, Users } from 'lucide-react';
@@ -44,7 +44,7 @@ const mainNavItems: NavItem[] = [
     },
         {
         title: 'Manajemen User',
-        href: user(),
+        href: users(),
         icon: Users,
     },
         {

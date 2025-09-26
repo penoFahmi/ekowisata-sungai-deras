@@ -9,7 +9,18 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 class Gallery extends Model
 {
     use HasFactory;
-    protected $guarded = ['id'];
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'path',
+        'type',
+        'imageable_id',
+        'imageable_type',
+    ];
 
     /**
      * Relasi polimorfik balik ke pemiliknya (bisa TourismSpot atau Umkm).

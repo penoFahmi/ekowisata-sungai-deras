@@ -9,7 +9,15 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard, user, kategori, wisata, umkm, agenda, setting } from '@/routes';
+import {
+    // dashboard,
+    // users,
+    // kategori,
+    // wisata,
+    // umkm,
+    // agenda,
+    // setting
+} from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import { Users, FolderOpen, LayoutGrid, MapPin, Settings, Calendar, Store } from 'lucide-react';
@@ -18,39 +26,39 @@ import AppLogo from './app-logo';
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
-        href: dashboard(),
+        href: 'admin/dashboard',
         icon: LayoutGrid,
     },
-        {
+    {
         title: 'Manajemen User',
-        href: user(),
+        href: 'admin/users',
         icon: Users,
     },
         {
         title: 'Manajemen Kategori',
-        href: kategori(),
+        href: 'admin/kategori',
         icon: FolderOpen,
     },
-        {
-        title: 'Manajemen Wisata',
-        href: wisata(),
-        icon: MapPin,
-    },
-        {
-        title: 'Manajemen UMKM',
-        href: umkm(),
-        icon: Store,
-    },
-        {
-        title: 'Manajemen Agenda',
-        href: agenda(),
-        icon: Calendar,
-    },
-        {
-        title: 'Pengaturan',
-        href: setting(),
-        icon: Settings,
-    },
+    //     {
+    //     title: 'Manajemen Wisata',
+    //     href: wisata(),
+    //     icon: MapPin,
+    // },
+    //     {
+    //     title: 'Manajemen UMKM',
+    //     href: umkm(),
+    //     icon: Store,
+    // },
+    //     {
+    //     title: 'Manajemen Agenda',
+    //     href: agenda(),
+    //     icon: Calendar,
+    // },
+    //     {
+    //     title: 'Pengaturan',
+    //     href: setting(),
+    //     icon: Settings,
+    // },
 ];
 
 export function AppSidebar() {

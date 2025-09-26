@@ -10,7 +10,19 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 class TourismSpot extends Model
 {
     use HasFactory;
-    protected $guarded = ['id'];
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'name',
+        'description',
+        'address',
+        'latitude',
+        'longitude',
+    ];
 
     /**
      * Satu tempat wisata dimiliki oleh satu kategori.

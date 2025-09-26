@@ -10,7 +10,22 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 class Umkm extends Model
 {
     use HasFactory;
-    protected $guarded = ['id'];
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'name',
+        'description',
+        'owner_name',
+        'phone_number',
+        'address',
+        'latitude',
+        'longitude',
+
+    ];
 
     /**
      * Satu UMKM dimiliki oleh satu kategori.

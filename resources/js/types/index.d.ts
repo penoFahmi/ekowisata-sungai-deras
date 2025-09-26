@@ -41,3 +41,24 @@ export interface User {
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
 }
+export interface Role {
+    id: number;
+    name: string;
+}
+
+// User yang memiliki relasi dengan roles
+export interface UserWithRoles extends User {
+    roles: Role[];
+}
+
+// Tipe untuk semua props yang dikirim dari Laravel ke halaman
+export type PageProps<T extends Record<string, unknown> = Record<string, unknown>> = T & {
+    auth: {
+        user: User;
+    };
+    // Untuk menampung flash message dari Laravel
+    flash: {
+        success?: string;
+        error?: string;
+    }
+};
