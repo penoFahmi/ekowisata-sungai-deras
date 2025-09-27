@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\AgendaController;
+use App\Http\Controllers\Admin\TourismSpotController;
 use App\Http\Controllers\Admin\UmkmController;
 use App\Http\Controllers\Admin\WisataController;
 use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
@@ -18,20 +19,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard/dashboard');
     })->name('dashboard');
-    Route::get('kategori', function () {
-        return Inertia::render('dashboard/kategori');
-    })->name('kategori');
     Route::get('wisata', function () {
         return Inertia::render('dashboard/wisata');
     })->name('wisata');
+    Route::get('umkm', function () {
+        return Inertia::render('dashboard/umkm');
+    })->name('umkm');
+    Route::get('agenda', function () {
+        return Inertia::render('dashboard/agenda');
+    })->name('agenda');
+    Route::get('setting', function () {
+        return Inertia::render('dashboard/setting');
+    })->name('setting');
 
-    // Route::resource('dashboard', DashboardController::class)->names('dashboard');
-    // Route::resource('users', UserController::class)->names('users');
     Route::resource('users', UserController::class)->except(['create', 'edit', 'show']);
-    Route::resource('kategori', CategoryController::class)->names('kategori');
-    Route::resource('wisata', WisataController::class)->names('wisata');
-    Route::resource('umkm', UmkmController::class)->names('umkm');
-    Route::resource('agenda', AgendaController::class)->names('agenda');
+    Route::resource('kategori', CategoryController::class)->except(['create', 'edit', 'show']);
+    // Route::resource('wisata', TourismSpotController::class)->except(['create', 'edit', 'show']);
+    // Route::resource('umkm', UmkmController::class)->except(['create', 'edit', 'show']);
+    // Route::resource('agenda', AgendaController::class)->except(['create', 'edit', 'show']);
 
 });
 

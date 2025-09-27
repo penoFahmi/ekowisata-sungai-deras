@@ -16,16 +16,8 @@ class CategoryController extends Controller
     public function index()
     {
         return Inertia::render('dashboard/kategori', [
-            'categories' => Category::latest()->paginate(10),
+            'categories' => Category::latest()->get(),
         ]);
-    }
-
-    /**
-     * Menampilkan form untuk membuat kategori baru.
-     */
-    public function create()
-    {
-        return Inertia::render('dashboard/kategori/create');
     }
 
     /**
@@ -40,18 +32,9 @@ class CategoryController extends Controller
 
         Category::create($validated);
 
-        return redirect()->route('admin.categories.index')->with('success', 'Kategori berhasil ditambahkan.');
+        return redirect()->route('kategori.index')->with('success', 'Kategori berhasil ditambahkan.');
     }
 
-    /**
-     * Menampilkan form untuk mengedit kategori.
-     */
-    public function edit(Category $category)
-    {
-        return Inertia::render('dashboard/kategori/edit', [
-            'category' => $category,
-        ]);
-    }
 
     /**
      * Memperbarui data kategori di database.
@@ -68,7 +51,7 @@ class CategoryController extends Controller
 
         $category->update($validated);
 
-        return redirect()->route('admin.categories.index')->with('success', 'Kategori berhasil diperbarui.');
+        return redirect()->route('kategori.index')->with('success', 'Kategori berhasil diperbarui.');
     }
 
     /**
@@ -80,6 +63,6 @@ class CategoryController extends Controller
 
         $category->delete();
 
-        return redirect()->route('admin.categories.index')->with('success', 'Kategori berhasil dihapus.');
+        return redirect()->route('kategori.index')->with('success', 'Kategori berhasil dihapus.');
     }
 }

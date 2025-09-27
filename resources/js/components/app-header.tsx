@@ -57,21 +57,21 @@ const mainNavItems: NavItem[] = [
         href: '/wisata',
         icon: MapPin,
     },
-    // {
-    //     title: 'Manajemen UMKM',
-    //     href: '/umkm',
-    //     icon: Store,
-    // },
-    // {
-    //     title: 'Manajemen Agenda',
-    //     href: '/agenda',
-    //     icon: Calendar,
-    // },
-    // {
-    //     title: 'Pengaturan',
-    //     href: '/setting',
-    //     icon: Settings,
-    // },
+    {
+        title: 'Manajemen UMKM',
+        href: '/umkm',
+        icon: Store,
+    },
+    {
+        title: 'Manajemen Agenda',
+        href: '/agenda',
+        icon: Calendar,
+    },
+    {
+        title: 'Pengaturan',
+        href: '/setting',
+        icon: Settings,
+    },
 ];
 
 const rightNavItems: NavItem[] = [
