@@ -26,12 +26,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('wisata');
 
     // Route::resource('dashboard', DashboardController::class)->names('dashboard');
-    Route::resource('users', UserController::class)->names('users');
+    // Route::resource('users', UserController::class)->names('users');
+    Route::resource('users', UserController::class)->except(['create', 'edit', 'show']);
     Route::resource('kategori', CategoryController::class)->names('kategori');
     Route::resource('wisata', WisataController::class)->names('wisata');
     Route::resource('umkm', UmkmController::class)->names('umkm');
     Route::resource('agenda', AgendaController::class)->names('agenda');
-
 
 });
 

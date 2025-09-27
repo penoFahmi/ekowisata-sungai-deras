@@ -13,24 +13,19 @@ use Illuminate\Validation\Rules;
 
 class UserController extends Controller
 {
-    /**
-     * Tampilkan halaman utama manajemen user.
-     */
     public function index()
     {
-        // Jika data user sangat banyak, gunakan paginate
         $users = User::with('roles')->latest()->get();
         $roles = Role::all();
 
-        return Inertia::render('dashboard/user', [
+        // PASTIKAN PATH INI SESUAI DENGAN LOKASI FILE User.tsx ANDA
+        // resources/js/pages/dashboard/user.tsx -> 'dashboard/user'
+        return Inertia::render('dashboard/user', [ // <-- KEMUNGKINAN PERLU DISESUAIKAN
             'users' => $users,
             'roles' => $roles,
         ]);
     }
 
-    /**
-     * Simpan user baru.
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -48,20 +43,15 @@ class UserController extends Controller
 
         $user->roles()->sync($request->roles);
 
-        return redirect()->route('admin.users.index')->with('success', 'User berhasil dibuat.');
+        // PERBAIKAN: Gunakan nama route yang benar
+        return redirect()->route('users.index')->with('success', 'User berhasil dibuat.');
     }
 
-    /**
-     * Update data user.
-     */
     public function update(Request $request, User $user)
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => [
-                'required', 'string', 'email', 'max:255',
-                Rule::unique('users', 'email')->ignore($user->id)
-            ],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
             'roles' => 'required|array'
         ]);
@@ -72,27 +62,24 @@ class UserController extends Controller
         ]);
 
         if ($request->filled('password')) {
-            $user->update([
-                'password' => Hash::make($request->password),
-            ]);
+            $user->update(['password' => Hash::make($request->password)]);
         }
 
         $user->roles()->sync($request->roles);
 
-        return redirect()->route('admin.users.index')->with('success', 'User berhasil diperbarui.');
+        // PERBAIKAN: Gunakan nama route yang benar
+        return redirect()->route('users.index')->with('success', 'User berhasil diperbarui.');
     }
 
-    /**
-     * Hapus user.
-     */
     public function destroy(User $user)
     {
         if (auth()->id() === $user->id) {
-            return redirect()->route('admin.users.index')->with('error', 'Anda tidak bisa menghapus akun Anda sendiri.');
+            return redirect()->route('users.index')->with('error', 'Anda tidak bisa menghapus akun Anda sendiri.');
         }
 
         $user->delete();
 
-        return redirect()->route('admin.users.index')->with('success', 'User berhasil dihapus.');
+        // PERBAIKAN: Gunakan nama route yang benar
+        return redirect()->route('users.index')->with('success', 'User berhasil dihapus.');
     }
 }
