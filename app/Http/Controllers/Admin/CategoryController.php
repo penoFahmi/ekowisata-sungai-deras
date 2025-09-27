@@ -13,10 +13,19 @@ class CategoryController extends Controller
     /**
      * Menampilkan daftar semua kategori.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $categories = Category::query()
+            ->when($request->input('search'), function ($query, $search) {
+                $query->where('name', 'like', "%{$search}%");
+            })
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
         return Inertia::render('dashboard/kategori', [
-            'categories' => Category::latest()->get(),
+            'categories' => $categories,
+            'filters' => $request->only('search'),
         ]);
     }
 
@@ -39,17 +48,17 @@ class CategoryController extends Controller
     /**
      * Memperbarui data kategori di database.
      */
-    public function update(Request $request, Category $category)
+    public function update(Request $request, Category $kategori)
     {
         $validated = $request->validate([
             'name' => [
                 'required', 'string', 'max:255',
-                Rule::unique('categories', 'name')->ignore($category->id)
+                Rule::unique('categories', 'name')->ignore($kategori->id)
             ],
             'type' => ['required', Rule::in(['wisata', 'umkm'])],
         ]);
 
-        $category->update($validated);
+        $kategori->update($validated);
 
         return redirect()->route('kategori.index')->with('success', 'Kategori berhasil diperbarui.');
     }
@@ -57,11 +66,11 @@ class CategoryController extends Controller
     /**
      * Menghapus kategori dari database.
      */
-    public function destroy(Category $category)
+    public function destroy(Category $kategori)
     {
         // Jika ingin mencegah penghapusan kategori yang masih digunakan, tambahkan pengecekan di sini
 
-        $category->delete();
+        $kategori->delete();
 
         return redirect()->route('kategori.index')->with('success', 'Kategori berhasil dihapus.');
     }

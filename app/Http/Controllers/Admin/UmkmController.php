@@ -15,11 +15,21 @@ class UmkmController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $umkm = Umkm::query()
+            ->when($request->input('search'), function ($query, $search) {
+                $query->where('name', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            })
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
         return Inertia::render('dashboard/umkm', [
-            'umkm' => Umkm::with('category')->latest()->get(),
-            'categories' => Category::where('type', 'umkm')->get(),
+            'umkm' => $umkm,
+            'categories' => Category::all(),
+            'filters' => $request->only('search'),
         ]);
     }
 

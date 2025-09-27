@@ -19,24 +19,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard/dashboard');
     })->name('dashboard');
-    Route::get('wisata', function () {
-        return Inertia::render('dashboard/wisata');
-    })->name('wisata');
-    Route::get('umkm', function () {
-        return Inertia::render('dashboard/umkm');
-    })->name('umkm');
-    Route::get('agenda', function () {
-        return Inertia::render('dashboard/agenda');
-    })->name('agenda');
     Route::get('setting', function () {
         return Inertia::render('dashboard/setting');
     })->name('setting');
 
     Route::resource('users', UserController::class)->except(['create', 'edit', 'show']);
     Route::resource('kategori', CategoryController::class)->except(['create', 'edit', 'show']);
-    // Route::resource('wisata', TourismSpotController::class)->except(['create', 'edit', 'show']);
-    // Route::resource('umkm', UmkmController::class)->except(['create', 'edit', 'show']);
-    // Route::resource('agenda', AgendaController::class)->except(['create', 'edit', 'show']);
+    Route::resource('wisata', TourismSpotController::class)->except(['create', 'edit', 'show']);
+    Route::resource('umkm', UmkmController::class)->except(['create', 'edit', 'show']);
+    Route::resource('agenda', AgendaController::class)->except(['create', 'edit', 'show']);
 
 });
 

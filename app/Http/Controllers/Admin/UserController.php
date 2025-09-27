@@ -13,16 +13,21 @@ use Illuminate\Validation\Rules;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::with('roles')->latest()->get();
-        $roles = Role::all();
+        $users = User::with('roles')
+            ->when($request->input('search'), function ($query, $search) {
+                $query->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            })
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
 
-        // PASTIKAN PATH INI SESUAI DENGAN LOKASI FILE User.tsx ANDA
-        // resources/js/pages/dashboard/user.tsx -> 'dashboard/user'
-        return Inertia::render('dashboard/user', [ // <-- KEMUNGKINAN PERLU DISESUAIKAN
+        return Inertia::render('dashboard/user', [
             'users' => $users,
-            'roles' => $roles,
+            'roles' => Role::all(),
+            'filters' => $request->only('search'),
         ]);
     }
 
