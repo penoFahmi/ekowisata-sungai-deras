@@ -27,8 +27,8 @@ class TourismSpotController extends Controller
             ->withQueryString();
 
         return Inertia::render('dashboard/wisata', [
-            'tourism_spots' => $tourismSpots,
-            'categories' => Category::all(),
+            'tourismSpots' => $tourismSpots,
+            'categories' => Category::where('type', 'wisata')->get(),
             'filters' => $request->only('search'),
         ]);
     }
@@ -43,8 +43,10 @@ class TourismSpotController extends Controller
             'category_id' => 'required|exists:categories,id',
             'description' => 'required|string',
             'address' => 'required|string|max:255',
-            'latitude' => 'nullable|numeric',
-            'longitude' => 'nullable|numeric',
+            // 'latitude' => 'nullable|numeric',
+            // 'longitude' => 'nullable|numeric',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'images' => 'required|array',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
@@ -73,6 +75,8 @@ class TourismSpotController extends Controller
             'address' => 'required|string|max:255',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'images' => 'nullable|array',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);

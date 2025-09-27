@@ -1,206 +1,150 @@
-// import React, { useEffect } from 'react';
-// import { useForm } from '@inertiajs/react';
-// import { LoaderCircle } from 'lucide-react';
-// import { Wisata, Category } from '@/types';
-// import {
-//     Dialog,
-//     DialogContent,
-//     DialogHeader,
-//     DialogTitle,
-//     DialogFooter,
-//     DialogDescription,
-// } from '@/components/ui/dialog';
-// import { Input } from '@/components/ui/input';
-// import { Button } from '@/components/ui/button';
-// import { Label } from '@/components/ui/label';
-// import InputError from '@/components/input-error';
-// import { route } from 'ziggy-js';
-// import {
-//     Select,
-//     SelectContent,
-//     SelectItem,
-//     SelectTrigger,
-//     SelectValue,
-// } from '@/components/ui/select';
-// import { Textarea } from '@/components/ui/textarea';
+import React, { useEffect, useState } from 'react';
+import { useForm } from '@inertiajs/react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { TourismSpot, Category } from '@/types';
+import { route } from 'ziggy-js';
 
-// interface ModalFormWisataProps {
-//     isOpen: boolean;
-//     onClose: () => void;
-//     wisata?: Wisata;
-//     categories: Category[];
-//     onSuccess?: () => void;
-// }
+interface ModalFormWisataProps {
+    isOpen: boolean;
+    onClose: () => void;
+    wisata?: TourismSpot;
+    categories: Category[];
+    onSuccess: () => void;
+}
 
-// export default function ModalFormWisata({
-//     isOpen,
-//     onClose,
-//     wisata,
-//     categories,
-//     onSuccess,
-// }: ModalFormWisataProps) {
-//     const isEditMode = !!wisata;
+export default function ModalFormWisata({ isOpen, onClose, wisata, categories, onSuccess }: ModalFormWisataProps) {
+    const { data, setData, post, processing, errors, reset, transform } = useForm({
+        _method: wisata ? 'PUT' : 'POST',
+        name: wisata?.name || '',
+        category_id: wisata?.category.id.toString() || '',
+        description: wisata?.description || '',
+        address: wisata?.address || '',
+        latitude: wisata?.latitude || '',
+        longitude: wisata?.longitude || '',
+        images: [] as File[],
+    });
 
-//     const { data, setData, post, put, processing, errors, reset, clearErrors } =
-//         useForm<{
-//             name: string;
-//             description: string;
-//             address: string;
-//             latitude: string;
-//             longitude: string;
-//             price: string;
-//             category_id: string;
-//             images: File[];
-//             _method?: string;
-//         }>({
-//             name: '',
-//             description: '',
-//             address: '',
-//             latitude: '',
-//             longitude: '',
-//             price: '0',
-//             category_id: '',
-//             images: [],
-//         });
+    const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
-//     useEffect(() => {
-//         if (isOpen) {
-//             clearErrors();
-//             if (isEditMode && wisata) {
-//                 setData({
-//                     name: wisata.name,
-//                     description: wisata.description,
-//                     address: wisata.address,
-//                     latitude: wisata.latitude,
-//                     longitude: wisata.longitude,
-//                     price: String(wisata.price),
-//                     category_id: String(wisata.category_id),
-//                     images: [],
-//                 });
-//             } else {
-//                 reset();
-//             }
-//         }
-//     }, [isOpen, wisata, isEditMode]);
+    useEffect(() => {
+        if (wisata) {
+            setData({
+                _method: 'PUT',
+                name: wisata.name,
+                category_id: wisata.category.id.toString(),
+                description: wisata.description,
+                address: wisata.address,
+                latitude: wisata.latitude,
+                longitude: wisata.longitude,
+                images: [],
+            });
+            setImagePreviews(wisata.galleries.map(img => `/storage/${img.path}`));
+        } else {
+            reset();
+            setImagePreviews([]);
+        }
+    }, [wisata, isOpen]);
 
-//     const handleSubmit = (e: React.FormEvent) => {
-//         e.preventDefault();
-//         const handleSuccess = () => {
-//             reset();
-//             onClose();
-//             onSuccess?.();
-//         };
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files) {
+            const files = Array.from(e.target.files);
+            setData('images', files);
+            const previews = files.map(file => URL.createObjectURL(file));
+            setImagePreviews(previews);
+        }
+    };
 
-//         if (isEditMode) {
-//             // Inertia doesn't handle PUT with multipart/form-data, so we use POST with _method=PUT
-//             post(route('wisata.update', wisata!.id), {
-//                 onSuccess: handleSuccess,
-//                 forceFormData: true,
-//             });
-//         } else {
-//             post(route('wisata.store'), {
-//                 onSuccess: handleSuccess,
-//             });
-//         }
-//     };
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        const url = wisata ? route('wisata.update', wisata.id) : route('wisata.store');
 
-//     return (
-//         <Dialog open={isOpen} onOpenChange={onClose}>
-//             <DialogContent
-//                 className="sm:max-w-2xl"
-//                 onInteractOutside={e => e.preventDefault()}>
-//                 <DialogHeader>
-//                     <DialogTitle>
-//                         {isEditMode ? 'Edit Wisata' : 'Tambah Wisata Baru'}
-//                     </DialogTitle>
-//                     <DialogDescription>
-//                         Isi detail wisata di bawah ini.
-//                     </DialogDescription>
-//                 </DialogHeader>
-//                 <form onSubmit={handleSubmit} className="grid gap-4 py-4">
-//                     <div className="grid grid-cols-4 items-center gap-4">
-//                         <Label htmlFor="name" className="text-right">
-//                             Nama
-//                         </Label>
-//                         <div className="col-span-3">
-//                             <Input id="name" value={data.name} onChange={e => setData('name', e.target.value)} />
-//                             <InputError message={errors.name} className="mt-1" />
-//                         </div>
-//                     </div>
+        // Inertia's useForm doesn't handle PUT with multipart/form-data well.
+        // We use a POST request with a _method field to simulate PUT.
+        transform((data) => ({
+            ...data,
+            _method: wisata ? 'PUT' : 'POST',
+        }));
 
-//                     <div className="grid grid-cols-4 items-start gap-4">
-//                         <Label htmlFor="description" className="text-right pt-2">
-//                             Deskripsi
-//                         </Label>
-//                         <div className="col-span-3">
-//                             <Textarea id="description" value={data.description} onChange={e => setData('description', e.target.value)} />
-//                             <InputError message={errors.description} className="mt-1" />
-//                         </div>
-//                     </div>
+        post(url, {
+            onSuccess: () => {
+                onSuccess();
+                onClose();
+            },
+            forceFormData: true,
+        });
+    };
 
-//                     <div className="grid grid-cols-4 items-center gap-4">
-//                         <Label htmlFor="address" className="text-right">
-//                             Alamat
-//                         </Label>
-//                         <div className="col-span-3">
-//                             <Input id="address" value={data.address} onChange={e => setData('address', e.target.value)} />
-//                             <InputError message={errors.address} className="mt-1" />
-//                         </div>
-//                     </div>
-
-//                     <div className="grid grid-cols-2 gap-4">
-//                         <div className="grid grid-cols-2 items-center gap-4">
-//                             <Label htmlFor="latitude" className="text-right">Latitude</Label>
-//                             <Input id="latitude" value={data.latitude} onChange={e => setData('latitude', e.target.value)} />
-//                             <InputError message={errors.latitude} className="col-span-2 mt-1" />
-//                         </div>
-//                         <div className="grid grid-cols-2 items-center gap-4">
-//                             <Label htmlFor="longitude" className="text-right">Longitude</Label>
-//                             <Input id="longitude" value={data.longitude} onChange={e => setData('longitude', e.target.value)} />
-//                             <InputError message={errors.longitude} className="col-span-2 mt-1" />
-//                         </div>
-//                     </div>
-
-//                     <div className="grid grid-cols-4 items-center gap-4">
-//                         <Label htmlFor="price" className="text-right">Harga Tiket</Label>
-//                         <div className="col-span-3">
-//                             <Input id="price" type="number" value={data.price} onChange={e => setData('price', e.target.value)} />
-//                             <InputError message={errors.price} className="mt-1" />
-//                         </div>
-//                     </div>
-
-//                     <div className="grid grid-cols-4 items-center gap-4">
-//                         <Label htmlFor="category_id" className="text-right">Kategori</Label>
-//                         <div className="col-span-3">
-//                             <Select value={data.category_id} onValueChange={value => setData('category_id', value)}>
-//                                 <SelectTrigger><SelectValue placeholder="Pilih kategori" /></SelectTrigger>
-//                                 <SelectContent>
-//                                     {categories.map(cat => (
-//                                         <SelectItem key={cat.id} value={String(cat.id)}>{cat.name}</SelectItem>
-//                                     ))}
-//                                 </SelectContent>
-//                             </Select>
-//                             <InputError message={errors.category_id} className="mt-1" />
-//                         </div>
-//                     </div>
-
-//                     <div className="grid grid-cols-4 items-start gap-4">
-//                         <Label htmlFor="images" className="text-right pt-2">Gambar</Label>
-//                         <div className="col-span-3">
-//                             <Input id="images" type="file" multiple onChange={e => setData('images', Array.from(e.target.files || []))} />
-//                             <InputError message={errors.images} className="mt-1" />
-//                         </div>
-//                     </div>
-
-//                     <DialogFooter>
-//                         <Button type="submit" disabled={processing}>
-//                             {processing && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
-//                             {isEditMode ? 'Simpan Perubahan' : 'Simpan Wisata'}
-//                         </Button>
-//                     </DialogFooter>
-//                 </form>
-//             </DialogContent>
-//         </Dialog>
-//     );
-// }
-
+    return (
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogContent className="sm:max-w-2xl">
+                <DialogHeader>
+                    <DialogTitle>{wisata ? 'Edit Tempat Wisata' : 'Tambah Tempat Wisata'}</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <Label htmlFor="name">Nama Wisata</Label>
+                            <Input id="name" value={data.name} onChange={(e) => setData('name', e.target.value)} />
+                            {errors.name && <p className="text-sm text-red-500 mt-1">{errors.name}</p>}
+                        </div>
+                        <div>
+                            <Label htmlFor="category_id">Kategori</Label>
+                            <Select value={data.category_id} onValueChange={(value) => setData('category_id', value)}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Pilih kategori" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {categories.map(cat => (
+                                        <SelectItem key={cat.id} value={cat.id.toString()}>{cat.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            {errors.category_id && <p className="text-sm text-red-500 mt-1">{errors.category_id}</p>}
+                        </div>
+                    </div>
+                    <div>
+                        <Label htmlFor="description">Deskripsi</Label>
+                        <Textarea id="description" value={data.description} onChange={(e) => setData('description', e.target.value)} />
+                        {errors.description && <p className="text-sm text-red-500 mt-1">{errors.description}</p>}
+                    </div>
+                    <div>
+                        <Label htmlFor="address">Alamat</Label>
+                        <Textarea id="address" value={data.address} onChange={(e) => setData('address', e.target.value)} />
+                        {errors.address && <p className="text-sm text-red-500 mt-1">{errors.address}</p>}
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <Label htmlFor="latitude">Latitude</Label>
+                            <Input id="latitude" type="number" value={data.latitude} onChange={(e) => setData('latitude', e.target.value)} />
+                            {errors.latitude && <p className="text-sm text-red-500 mt-1">{errors.latitude}</p>}
+                        </div>
+                        <div>
+                            <Label htmlFor="longitude">Longitude</Label>
+                            <Input id="longitude" type="number" value={data.longitude} onChange={(e) => setData('longitude', e.target.value)} />
+                            {errors.longitude && <p className="text-sm text-red-500 mt-1">{errors.longitude}</p>}
+                        </div>
+                    </div>
+                    <div>
+                        <Label htmlFor="images">Gambar (bisa lebih dari satu)</Label>
+                        <Input id="images" type="file" multiple onChange={handleImageChange} />
+                        {errors.images && <p className="text-sm text-red-500 mt-1">{errors.images}</p>}
+                        <div className="mt-2 grid grid-cols-3 gap-2">
+                            {imagePreviews.map((src, index) => (
+                                <img key={index} src={src} alt={`Preview ${index}`} className="h-24 w-full object-cover rounded-md" />
+                            ))}
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button type="button" variant="outline" onClick={onClose}>Batal</Button>
+                        <Button type="submit" disabled={processing}>{processing ? 'Menyimpan...' : 'Simpan'}</Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
+    );
+}

@@ -72,6 +72,21 @@ export interface Category {
     updated_at: string;
 }
 
+// Tipe untuk model Gallery
+export interface Gallery {
+    id: number;
+    path: string;
+}
+
+// Tipe untuk model TourismSpot
+export interface TourismSpot {
+    id: number;
+    name: string;
+    description: string;
+    category: Category;
+    galleries: Gallery[];
+}
+
 // Tipe untuk response paginasi dari Laravel
 export interface PaginatedResponse<T> {
     data: T[];
