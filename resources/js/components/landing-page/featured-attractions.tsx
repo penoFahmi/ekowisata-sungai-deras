@@ -14,12 +14,14 @@ export function FeaturedAttractions({ tourismSpots }: FeaturedAttractionsProps) 
     return (
         <section id="wisata" className="container py-12 md:py-24">
             <div className="mx-auto flex max-w-5xl flex-col items-center space-y-4 text-center">
-                <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">Wisata Unggulan</h2>
+                <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
+                    Wisata Unggulan
+                </h2>
                 <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
                     Jelajahi keindahan alam dan budaya Desa Sungai Deras yang mempesona.
                 </p>
             </div>
-            <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {tourismSpots.map((spot) => (
                     <Card key={spot.id} className="overflow-hidden">
                         <CardHeader className="p-0">

@@ -83,6 +83,9 @@ export interface TourismSpot {
     id: number;
     name: string;
     description: string;
+    address: string;
+    latitude: string;
+    longitude: string;
     category: Category;
     galleries: Gallery[];
 }

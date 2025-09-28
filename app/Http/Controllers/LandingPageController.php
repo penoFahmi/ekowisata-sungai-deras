@@ -18,13 +18,13 @@ class LandingPageController extends Controller
         // Ambil 4 data wisata terbaru dengan relasi galeri
         $tourismSpots = TourismSpot::with('galleries', 'category')
             ->latest()
-            ->take(4)
+            ->take(3)
             ->get();
 
         // Ambil 4 data UMKM terbaru dengan relasi galeri
         $umkms = Umkm::with('galleries', 'category')
             ->latest()
-            ->take(4)
+            ->take(3)
             ->get();
 
         // Ambil 3 agenda mendatang

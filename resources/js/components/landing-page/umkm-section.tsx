@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Umkm } from "@/types";
 import { Card, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -12,92 +13,31 @@ import {
 } from "lucide-react";
 import { ImageWithFallback } from "../figma/ImageWithFallback";
 
-const umkmCategories = [
-  "Semua",
-  "Kerajinan",
-  "Makanan & Minuman",
-  "Tekstil",
-  "Pertanian",
-  "Jasa"
-];
+interface UMKMSectionProps {
+  umkms: Umkm[];
+}
 
-const umkmData = [
-  {
-    id: 1,
-    name: "Kerajinan Bambu Pak Joko",
-    category: "Kerajinan",
-    description: "Aneka kerajinan bambu berkualitas tinggi: keranjang, tempat tisu, hiasan dinding",
-    image: "https://images.unsplash.com/photo-1575839127397-c12e55f70a38?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx0cmFkaXRpb25hbCUyMGhhbmRpY3JhZnQlMjB3b3Jrc2hvcHxlbnwxfHx8fDE3NTgzODYzNzB8MA&ixlib=rb-4.1.0&q=80&w=1080",
-    rating: 4.7,
-    location: "Jl. Kerajinan No. 15",
-    price: "Rp 25.000 - Rp 150.000"
-  },
-  {
-    id: 2,
-    name: "Batik Sari Indah",
-    category: "Tekstil",
-    description: "Batik tulis dan cap dengan motif khas Sungai Deras, tersedia baju dan kain",
-    image: "https://images.unsplash.com/photo-1672716912467-fd99b71cf780?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxiYXRpayUyMHRleHRpbGUlMjBpbmRvbmVzaWF8ZW58MXx8fHwxNzU4Mzg2NDc1fDA&ixlib=rb-4.1.0&q=80&w=1080",
-    rating: 4.8,
-    location: "Kampung Tenun",
-    price: "Rp 75.000 - Rp 300.000"
-  },
-  {
-    id: 3,
-    name: "Keripik Singkong Mak Tini",
-    category: "Makanan & Minuman",
-    description: "Keripik singkong renyah dengan berbagai varian rasa: original, balado, keju",
-    image: "https://images.unsplash.com/photo-1622572771591-6ca7813cc39d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsb2NhbCUyMGZvb2QlMjBtYXJrZXQlMjBpbmRvbmVzaWF8ZW58MXx8fHwxNzU4Mzg2MzczfDA&ixlib=rb-4.1.0&q=80&w=1080",
-    rating: 4.6,
-    location: "Jl. Raya Desa No. 28",
-    price: "Rp 15.000 - Rp 25.000"
-  },
-  {
-    id: 4,
-    name: "Tani Organik Segar",
-    category: "Pertanian",
-    description: "Sayuran organik segar: kangkung, bayam, tomat, cabai langsung dari kebun",
-    image: "https://images.unsplash.com/photo-1667885098658-f34fed001418?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxvcmdhbmljJTIwdmVnZXRhYmxlcyUyMG1hcmtldHxlbnwxfHx8fDE3NTgyODU1ODl8MA&ixlib=rb-4.1.0&q=80&w=1080",
-    rating: 4.5,
-    location: "Area Persawahan",
-    price: "Rp 5.000 - Rp 20.000"
-  },
-  {
-    id: 5,
-    name: "Furniture Kayu Pak Budi",
-    category: "Kerajinan",
-    description: "Mebel kayu jati berkualitas: meja, kursi, lemari dengan desain modern dan klasik",
-    image: "https://images.unsplash.com/photo-1738679616159-59dd8542a5ba?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3b29kZW4lMjBjcmFmdHMlMjBpbmRvbmVzaWF8ZW58MXx8fHwxNzU4Mzg2NDcyfDA&ixlib=rb-4.1.0&q=80&w=1080",
-    rating: 4.9,
-    location: "Jl. Industri No. 7",
-    price: "Rp 500.000 - Rp 5.000.000"
-  },
-  {
-    id: 6,
-    name: "Gudeg Bu Minah",
-    category: "Makanan & Minuman",
-    description: "Gudeg jogja autentik dengan bumbu rahasia turun temurun, tersedia paket lengkap",
-    image: "https://images.unsplash.com/photo-1622572771591-6ca7813cc39d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsb2NhbCUyMGZvb2QlMjBtYXJrZXQlMjBpbmRvbmVzaWF8ZW58MXx8fHwxNzU4Mzg2MzczfDA&ixlib=rb-4.1.0&q=80&w=1080",
-    rating: 4.8,
-    location: "Pusat Kuliner",
-    price: "Rp 18.000 - Rp 35.000"
-  }
-];
-
-export function UMKMSection() {
+export function UMKMSection({ umkms }: UMKMSectionProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Semua");
 
-  const filteredUMKM = umkmData.filter(item => {
+  // Membuat daftar kategori dinamis dari data yang ada
+  const umkmCategories = ["Semua", ...Array.from(new Set(umkms.map(item => item.category.name)))];
+
+  const filteredUMKM = umkms.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          item.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === "Semua" || item.category === selectedCategory;
+    const matchesCategory = selectedCategory === "Semua" || item.category.name === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
   const handleViewDirectory = () => {
     const element = document.querySelector('#umkm');
     element?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const getImageUrl = (path: string) => {
+    return path ? `/storage/${path}` : 'https://placehold.co/600x400/png?text=UMKM';
   };
 
   return (
@@ -148,16 +88,16 @@ export function UMKMSection() {
             <Card key={umkm.id} className="group hover:shadow-xl transition-all duration-300 overflow-hidden">
               <div className="relative overflow-hidden">
                 <ImageWithFallback
-                  src={umkm.image}
+                  src={getImageUrl(umkm.galleries[0]?.path)}
                   alt={umkm.name}
                   className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                 />
                 <div className="absolute top-4 left-4">
-                  <Badge variant="secondary">{umkm.category}</Badge>
+                  <Badge variant="secondary">{umkm.category.name}</Badge>
                 </div>
                 <div className="absolute top-4 right-4 bg-white/90 px-2 py-1 rounded-lg flex items-center">
                   <Star className="w-4 h-4 text-yellow-500 mr-1" />
-                  <span className="text-sm">{umkm.rating}</span>
+                  <span className="text-sm">4.5</span> {/* Rating statis untuk sementara */}
                 </div>
               </div>
 
@@ -170,10 +110,10 @@ export function UMKMSection() {
                 <div className="space-y-2 mb-4">
                   <div className="flex items-center text-sm text-muted-foreground">
                     <MapPin className="w-4 h-4 mr-1" />
-                    {umkm.location}
+                    {umkm.address}
                   </div>
                   <div className="text-sm font-semibold text-primary">
-                    {umkm.price}
+                    {umkm.owner_name}
                   </div>
                 </div>
 
