@@ -1,9 +1,8 @@
 import { useState } from "react";
+import { router } from "@inertiajs/react";
 import { Button } from "../ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
 import { Menu, MapPin, Home, Store, Calendar, User } from "lucide-react";
-import { login } from "@/routes";
-import { route } from "ziggy-js";
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -38,8 +37,12 @@ export function Navigation() {
 
   const handleNavClick = (href: string) => {
     setIsOpen(false);
-    const element = document.querySelector(href);
-    element?.scrollIntoView({ behavior: 'smooth' });
+    if (href.startsWith('#')) {
+      const element = document.querySelector(href);
+      element?.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      router.visit(href);
+    }
   };
 
   return (
