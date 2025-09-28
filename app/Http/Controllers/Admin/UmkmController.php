@@ -17,7 +17,7 @@ class UmkmController extends Controller
      */
     public function index(Request $request)
     {
-        $umkm = Umkm::query()
+        $umkms = Umkm::with('category', 'galleries')
             ->when($request->input('search'), function ($query, $search) {
                 $query->where('name', 'like', "%{$search}%")
                     ->orWhere('description', 'like', "%{$search}%");
@@ -27,8 +27,8 @@ class UmkmController extends Controller
             ->withQueryString();
 
         return Inertia::render('dashboard/umkm', [
-            'umkm' => $umkm,
-            'categories' => Category::all(),
+            'umkms' => $umkms,
+            'categories' => Category::where('type', 'umkm')->get(),
             'filters' => $request->only('search'),
         ]);
     }
@@ -42,19 +42,23 @@ class UmkmController extends Controller
             'name' => 'required|string|max:255|unique:umkms,name',
             'category_id' => 'required|exists:categories,id',
             'description' => 'required|string',
-            'address' => 'required|string|max:255',
             'owner_name' => 'required|string|max:255',
-            'contact_number' => 'nullable|string|max:20',
-            'latitude' => 'nullable|numeric',
-            'longitude' => 'nullable|numeric',
-            'main_image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'phone_number' => 'nullable|string|max:20',
+            'address' => 'required|string|max:255',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
+            'images' => 'required|array',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
-        if ($request->hasFile('main_image')) {
-            $validated['main_image'] = $request->file('main_image')->store('umkm-images', 'public');
-        }
+        $umkm = Umkm::create($validated);
 
-        Umkm::create($validated);
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $path = $image->store('umkm-images', 'public');
+                $umkm->galleries()->create(['path' => $path]);
+            }
+        }
 
         return redirect()->route('umkm.index')->with('success', 'Data UMKM berhasil ditambahkan.');
     }
@@ -68,25 +72,29 @@ class UmkmController extends Controller
             'name' => ['required', 'string', 'max:255', Rule::unique('umkms')->ignore($umkm->id)],
             'category_id' => 'required|exists:categories,id',
             'description' => 'required|string',
-            'address' => 'required|string|max:255',
             'owner_name' => 'required|string|max:255',
-            'contact_number' => 'nullable|string|max:20',
-            'latitude' => 'nullable|numeric',
-            'longitude' => 'nullable|numeric',
-            'main_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'phone_number' => 'nullable|string|max:20',
+            'address' => 'required|string|max:255',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
+            'images' => 'nullable|array',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
-        // Handle file upload
-        if ($request->hasFile('main_image')) {
-            // Delete old image if it exists
-            if ($umkm->main_image) {
-                Storage::disk('public')->delete($umkm->main_image);
-            }
-            // Store new image
-            $validated['main_image'] = $request->file('main_image')->store('umkm-images', 'public');
-        }
-
         $umkm->update($validated);
+
+        if ($request->hasFile('images')) {
+            // Hapus gambar lama
+            foreach ($umkm->galleries as $gallery) {
+                Storage::disk('public')->delete($gallery->path);
+                $gallery->delete();
+            }
+            // Unggah gambar baru
+            foreach ($request->file('images') as $image) {
+                $path = $image->store('umkm-images', 'public');
+                $umkm->galleries()->create(['path' => $path]);
+            }
+        }
 
         return redirect()->route('umkm.index')->with('success', 'Data UMKM berhasil diperbarui.');
     }
@@ -96,9 +104,9 @@ class UmkmController extends Controller
      */
     public function destroy(Umkm $umkm)
     {
-        // Delete the associated image from storage
-        if ($umkm->main_image) {
-            Storage::disk('public')->delete($umkm->main_image);
+        // Hapus semua gambar terkait dari storage
+        foreach ($umkm->galleries as $gallery) {
+            Storage::disk('public')->delete($gallery->path);
         }
 
         $umkm->delete();

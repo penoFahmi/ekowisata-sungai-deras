@@ -43,8 +43,6 @@ class TourismSpotController extends Controller
             'category_id' => 'required|exists:categories,id',
             'description' => 'required|string',
             'address' => 'required|string|max:255',
-            // 'latitude' => 'nullable|numeric',
-            // 'longitude' => 'nullable|numeric',
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
             'images' => 'required|array',

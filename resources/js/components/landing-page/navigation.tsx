@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Button } from "../components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "../components/ui/sheet";
+import { Button } from "../ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
 import { Menu, MapPin, Home, Store, Calendar, User } from "lucide-react";
 import { login } from "@/routes";
+import { route } from "ziggy-js";
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -29,7 +30,7 @@ export function Navigation() {
         icon: Calendar
     },
     {
-        href: login(),
+        href: '/login',
         label: "Login",
         icon: User
     },

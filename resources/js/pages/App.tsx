@@ -1,13 +1,13 @@
 'use client'
 
-import { Navigation } from "../layouts/navigation";
-import { HeroSection } from "../layouts/hero-section";
-import { FeaturedAttractions } from "../layouts/featured-attractions";
-import { InteractiveMap } from "../layouts/interactive-map";
-import { UMKMSection } from "../layouts/umkm-section";
-import { EventsSection } from "../layouts/events-section";
-import { TestimonialSection } from "../layouts/testimonial-section";
-import { Footer } from "../layouts/footer";
+import { Navigation } from "../components/landing-page/navigation";
+import { HeroSection } from "../components/landing-page/hero-section";
+import { FeaturedAttractions } from "../components/landing-page/featured-attractions";
+import { InteractiveMap } from "../components/landing-page/interactive-map";
+import { UMKMSection } from "../components/landing-page/umkm-section";
+import { EventsSection } from "../components/landing-page/events-section";
+import { TestimonialSection } from "../components/landing-page/testimonial-section";
+import { Footer } from "../components/landing-page/footer";
 
 export default function App() {
   return (

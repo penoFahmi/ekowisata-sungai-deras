@@ -1,6 +1,6 @@
-import { Button } from "../components/ui/button";
+import { Button } from "../ui/button";
 import { ArrowRight, MapPin } from "lucide-react";
-import { ImageWithFallback } from "../components/figma/ImageWithFallback";
+import { ImageWithFallback } from "../figma/ImageWithFallback";
 
 export function HeroSection() {
   const handleExploreMap = () => {

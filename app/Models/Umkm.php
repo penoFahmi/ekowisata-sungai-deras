@@ -18,6 +18,7 @@ class Umkm extends Model
      */
     protected $fillable = [
         'name',
+        'category_id',
         'description',
         'owner_name',
         'phone_number',

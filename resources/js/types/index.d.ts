@@ -87,6 +87,20 @@ export interface TourismSpot {
     galleries: Gallery[];
 }
 
+// Tipe untuk model Umkm
+export interface Umkm {
+    id: number;
+    name: string;
+    description: string;
+    owner_name: string;
+    phone_number: string;
+    address: string;
+    latitude: string;
+    longitude: string;
+    category: Category;
+    galleries: Gallery[];
+}
+
 // Tipe untuk response paginasi dari Laravel
 export interface PaginatedResponse<T> {
     data: T[];

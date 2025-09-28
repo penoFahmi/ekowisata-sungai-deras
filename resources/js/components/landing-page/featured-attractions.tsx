@@ -1,7 +1,7 @@
-import { Card, CardContent } from "../components/ui/card";
-import { Button } from "../components/ui/button";
+import { Card, CardContent } from "../ui/card";
+import { Button } from "../ui/button";
 import { MapPin, Star, ArrowRight } from "lucide-react";
-import { ImageWithFallback } from "../components/figma/ImageWithFallback";
+import { ImageWithFallback } from "../figma/ImageWithFallback";
 
 const attractions = [
   {
