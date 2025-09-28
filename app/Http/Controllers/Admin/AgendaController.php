@@ -6,13 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Agenda;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class AgendaController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Menampilkan daftar semua agenda.
      */
     public function index(Request $request)
     {
@@ -26,27 +25,27 @@ class AgendaController extends Controller
             ->withQueryString();
 
         return Inertia::render('dashboard/agenda', [
-            'agendas' => Agenda::latest()->get(),
+            'agendas' => $agendas,
             'filters' => $request->only('search'),
         ]);
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Menyimpan agenda baru.
      */
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'title' => 'required|string|max:255|unique:agendas,title',
+            'title' => 'required|string|max:255',
             'description' => 'required|string',
-            'location' => 'required|string|max:255',
             'start_time' => 'required|date',
-            'end_time' => 'nullable|date|after_or_equal:start_time',
-            'poster_image_path' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'end_time' => 'required|date|after_or_equal:start_time',
+            'location' => 'required|string|max:255',
+            'poster_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
-        if ($request->hasFile('poster_image_path')) {
-            $validated['poster_image_path'] = $request->file('poster_image_path')->store('agenda-images', 'public');
+        if ($request->hasFile('poster_image')) {
+            $validated['poster_image_path'] = $request->file('poster_image')->store('agenda-posters', 'public');
         }
 
         Agenda::create($validated);
@@ -55,27 +54,24 @@ class AgendaController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Memperbarui agenda yang ada.
      */
     public function update(Request $request, Agenda $agenda)
     {
         $validated = $request->validate([
-            'title' => ['required', 'string', 'max:255', Rule::unique('agendas')->ignore($agenda->id)],
+            'title' => 'required|string|max:255',
             'description' => 'required|string',
-            'location' => 'required|string|max:255',
             'start_time' => 'required|date',
-            'end_time' => 'nullable|date|after_or_equal:start_time',
-            'poster_image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'end_time' => 'required|date|after_or_equal:start_time',
+            'location' => 'required|string|max:255',
+            'poster_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
-        // Handle file upload
-        if ($request->hasFile('poster_image_path')) {
-            // Hapus gambar lama jika ada
+        if ($request->hasFile('poster_image')) {
             if ($agenda->poster_image_path) {
                 Storage::disk('public')->delete($agenda->poster_image_path);
             }
-            // Simpan gambar baru
-            $validated['poster_image_path'] = $request->file('poster_image_path')->store('agenda-images', 'public');
+            $validated['poster_image_path'] = $request->file('poster_image')->store('agenda-posters', 'public');
         }
 
         $agenda->update($validated);
@@ -84,15 +80,13 @@ class AgendaController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Menghapus agenda.
      */
     public function destroy(Agenda $agenda)
     {
-        // Hapus gambar terkait dari storage
         if ($agenda->poster_image_path) {
             Storage::disk('public')->delete($agenda->poster_image_path);
         }
-
         $agenda->delete();
 
         return redirect()->route('agenda.index')->with('success', 'Agenda berhasil dihapus.');

@@ -101,6 +101,18 @@ export interface Umkm {
     galleries: Gallery[];
 }
 
+// Tipe untuk model Agenda
+export interface Agenda {
+    id: number;
+    title: string;
+    description: string;
+    location: string;
+    start_time: string;
+    end_time: string;
+    poster_image_path: string | null;
+}
+
+
 // Tipe untuk response paginasi dari Laravel
 export interface PaginatedResponse<T> {
     data: T[];

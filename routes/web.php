@@ -1,19 +1,23 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
-use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\AgendaController;
+use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\TourismSpotController;
 use App\Http\Controllers\Admin\UmkmController;
-use App\Http\Controllers\Admin\WisataController;
-use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
+use App\Http\Controllers\LandingPageController;
+use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('App');
-})->name('home');
+Route::get('/', [LandingPageController::class, 'index'])->name('home');
+
+// Rute sementara untuk membuat storage link di hosting
+Route::get('/storage-link', function () {
+    $targetFolder = storage_path('app/public');
+    $linkFolder = $_SERVER['DOCUMENT_ROOT'] . '/storage';
+    symlink($targetFolder, $linkFolder);
+    return 'Symbolic link has been created.';
+});
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
