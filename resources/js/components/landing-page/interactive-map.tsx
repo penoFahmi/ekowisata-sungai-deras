@@ -52,14 +52,14 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
 
   useEffect(() => {
     // Ambil data GeoJSON dari folder public
-    fetch('/maps/batas_desa.geojson')
+    fetch('/maps/peta.geojson')
       .then(res => res.json())
       .then(data => setDesaBoundary(data))
       .catch(err => console.error("Gagal memuat batas desa:", err));
 
-    fetch('/maps/batas_dusun.geojson')
-      .then(res => res.json())
-      .then(data => setDusunBoundary(data));
+    // fetch('/maps/batas_dusun.geojson')
+    //   .then(res => res.json())
+    //   .then(data => setDusunBoundary(data));
   }, []);
 
   // Gabungkan data wisata dan umkm menjadi satu array untuk ditampilkan di peta
