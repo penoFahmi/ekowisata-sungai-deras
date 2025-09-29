@@ -1,6 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
 import { TourismSpot, Umkm } from "@/types";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import {
@@ -14,6 +13,7 @@ import {
 
 // Import komponen dari react-leaflet
 import { MapContainer, TileLayer, Marker, Popup, GeoJSON } from 'react-leaflet';
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -36,6 +36,26 @@ const categories = [
   { id: "umkm", name: "UMKM", icon: Store, color: "bg-purple-500" },
 ];
 
+// --- START: Penambahan Ikon Kustom ---
+const wisataIcon = new L.Icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+});
+
+const umkmIcon = new L.Icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+});
+// --- END: Penambahan Ikon Kustom ---
+
 interface InteractiveMapProps {
   tourismSpots: TourismSpot[];
   umkms: Umkm[];
@@ -43,7 +63,6 @@ interface InteractiveMapProps {
 
 export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [desaBoundary, setDesaBoundary] = useState(null);
   const [dusunBoundary, setDusunBoundary] = useState(null);
 
   // Style untuk layer batas desa dan dusun
@@ -53,14 +72,21 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
   useEffect(() => {
     // Ambil data GeoJSON dari folder public
     fetch('/maps/peta.geojson')
-      .then(res => res.json())
-      .then(data => setDesaBoundary(data))
-      .catch(err => console.error("Gagal memuat batas desa:", err));
-
-    // fetch('/maps/batas_dusun.geojson')
-    //   .then(res => res.json())
-    //   .then(data => setDusunBoundary(data));
+        .then(res => res.json())
+        .then(data => setDusunBoundary(data))
+        .catch(err => console.error("Gagal memuat batas dusun:", err));
   }, []);
+
+  // --- START: Fungsi untuk Popup Nama Dusun ---
+  const onEachDusun = (feature, layer) => {
+    if (feature.properties && feature.properties.Keterangan) {
+      layer.bindPopup(feature.properties.Keterangan);
+      layer.on('mouseover', function (e) {
+        this.openPopup();
+      });
+    }
+  };
+  // --- END: Fungsi untuk Popup Nama Dusun ---
 
   // Gabungkan data wisata dan umkm menjadi satu array untuk ditampilkan di peta
   const pointsOfInterest = useMemo(() => {
@@ -139,14 +165,15 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
                 {/* Tampilkan layer GeoJSON jika data sudah dimuat */}
-                {dusunBoundary && <GeoJSON data={dusunBoundary} style={dusunStyle} />}
-                {desaBoundary && <GeoJSON data={desaBoundary} style={desaStyle} />}
+                {dusunBoundary && <GeoJSON data={dusunBoundary} style={dusunStyle} onEachFeature={onEachDusun} />}
 
 
                 {filteredPOIs.map((poi) => {
                   if (!poi.latitude || !poi.longitude) return null;
+                  // Pilih ikon berdasarkan tipe
+                  const markerIcon = poi.type === 'wisata' ? wisataIcon : umkmIcon;
                   return (
-                    <Marker key={`${poi.type}-${poi.id}`} position={[parseFloat(poi.latitude), parseFloat(poi.longitude)]}>
+                    <Marker key={`${poi.type}-${poi.id}`} position={[parseFloat(poi.latitude), parseFloat(poi.longitude)]} icon={markerIcon}>
                       <Popup>
                         <div className="w-48">
                           <img src={getImageUrl(poi.galleries[0]?.path)} alt={poi.name} className="w-full h-24 object-cover rounded-md mb-2" />

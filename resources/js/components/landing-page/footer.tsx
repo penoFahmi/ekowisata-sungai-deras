@@ -13,7 +13,7 @@ export function Footer() {
 
   const attractions = [
     "Air Terjun Sungai Deras",
-    "Bukit Sunrise",
+    "Bukit Bendera",
     "Sentra Kerajinan Bambu",
     "Pasar Kuliner Tradisional",
     "Homestay Sari Asih"
@@ -92,8 +92,8 @@ export function Footer() {
                 <MapPin className="w-5 h-5 mt-0.5 text-secondary-foreground/60" />
                 <div className="text-sm text-secondary-foreground/80">
                   <p>Desa Sungai Deras</p>
-                  <p>Kecamatan Indah, Kabupaten Sejahtera</p>
-                  <p>Provinsi Nusantara 12345</p>
+                  <p>Kecamatan Teluk Pakedai, Kabupaten Kubu Raya</p>
+                  <p>Provinsi Kalimantan Barat</p>
                 </div>
               </div>
 
