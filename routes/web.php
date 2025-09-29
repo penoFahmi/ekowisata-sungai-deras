@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\AgendaController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\TourismSpotController;
@@ -20,9 +21,7 @@ Route::get('/storage-link', function () {
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard/dashboard');
-    })->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('setting', function () {
         return Inertia::render('dashboard/setting');
     })->name('setting');

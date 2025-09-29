@@ -67,7 +67,7 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
 
   // Style untuk layer batas desa dan dusun
   const desaStyle = { color: "#e67e22", weight: 3, opacity: 0.8, fillOpacity: 0.1 };
-  const dusunStyle = { color: "#3498db", weight: 1.5, opacity: 0.7, dashArray: '5, 5' };
+  const dusunStyle = { color: "#e67e22", weight: 1.5, opacity: 0.7, dashArray: '5, 5' };
 
   useEffect(() => {
     // Ambil data GeoJSON dari folder public
@@ -164,6 +164,7 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
+
                 {/* Tampilkan layer GeoJSON jika data sudah dimuat */}
                 {dusunBoundary && <GeoJSON data={dusunBoundary} style={dusunStyle} onEachFeature={onEachDusun} />}
 
