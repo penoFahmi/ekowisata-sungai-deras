@@ -33,7 +33,7 @@ class RoleSeeder extends Seeder
             ],
             [
                 'name' => 'pengelola-bank-foto-digital',
-                'display_name' => 'Pengelola SIG',
+                'display_name' => 'Pengelola Foto Digital',
             ],
             [
                 'name' => 'user-terdaftar',
