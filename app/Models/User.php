@@ -67,4 +67,14 @@ class User extends Authenticatable
         }
         return false;
     }
+
+    public function photos()
+    {
+        return $this->hasMany(Photo::class);
+    }
+
+    public function likedPhotos()
+    {
+        return $this->belongsToMany(Photo::class, 'photo_user_like');
+    }
 }

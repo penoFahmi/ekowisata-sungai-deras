@@ -113,7 +113,7 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
   // Tentukan titik tengah peta, bisa dari data pertama atau lokasi desa
   const mapCenter: [number, number] = pointsOfInterest.length > 0
     ? [parseFloat(pointsOfInterest[0].latitude), parseFloat(pointsOfInterest[0].longitude)]
-    : [-0.26, 109.24]; // Default jika tidak ada data
+    : [-0.26047206364560166, 109.24124454050668]; // Default jika tidak ada data
 
   return (
     <section id="map" className="py-20 bg-white">

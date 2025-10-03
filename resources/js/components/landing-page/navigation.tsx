@@ -29,6 +29,11 @@ export function Navigation() {
         icon: Calendar
     },
     {
+        href: "/bank-foto",
+        label: "Bank Foto",
+        icon: Calendar
+    },
+    {
         href: '/login',
         label: "Login",
         icon: User
