@@ -32,7 +32,7 @@ class RoleSeeder extends Seeder
                 'display_name' => 'Pengelola UMKM',
             ],
             [
-                'name' => 'pengelola-sig',
+                'name' => 'pengelola-bank-foto-digital',
                 'display_name' => 'Pengelola SIG',
             ],
             [

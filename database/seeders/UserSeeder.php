@@ -18,7 +18,7 @@ class UserSeeder extends Seeder
         $adminRole = Role::where('name', 'administrator')->first();
         $wisataRole = Role::where('name', 'pengelola-wisata')->first();
         $umkmRole = Role::where('name', 'pengelola-umkm')->first();
-        $sigRole = Role::where('name', 'pengelola-sig')->first();
+        $sigRole = Role::where('name', 'pengelola-bank-foto-digital')->first();
         $userRole = Role::where('name', 'user-terdaftar')->first();
 
         // 2. Buat user Administrator
@@ -62,12 +62,12 @@ class UserSeeder extends Seeder
             $umkmUser->roles()->sync($umkmRole->id);
         }
 
-        // 5. Buat user Pengelola SIG
+        // 5. Buat user Pengelola Bank Foto Digital
         if ($sigRole) {
             $sigUser = User::firstOrCreate(
-                ['email' => 'sig@sungaideras.com'],
+                ['email' => 'bankfotodigital@sungaideras.com'],
                 [
-                    'name' => 'Pengelola SIG',
+                    'name' => 'Pengelola Bank Foto Digital',
                     'password' => Hash::make('password'),
                     'email_verified_at' => now(),
                 ]
