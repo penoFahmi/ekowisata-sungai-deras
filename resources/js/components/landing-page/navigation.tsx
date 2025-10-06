@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { router, usePage, Link } from "@inertiajs/react";
 import { Button } from "../ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
@@ -16,6 +16,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState("");
   const { auth } = usePage<PageProps>().props;
 
   const navItems = [
@@ -45,6 +47,39 @@ export function Navigation() {
         icon: Camera
     },
   ];
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // Handle background change
+      setIsScrolled(window.scrollY > 10);
+
+      // Handle active section highlighting
+      const scrollPosition = window.scrollY + 100; // Offset to trigger a bit earlier
+      let currentSection = "";
+
+      navItems.forEach(item => {
+        if (item.href.startsWith('#')) {
+          const element = document.querySelector(item.href);
+          if (element instanceof HTMLElement) {
+            if (element.offsetTop <= scrollPosition) {
+              currentSection = item.href;
+            }
+          }
+        }
+      });
+
+      // Fallback to home if at the very top
+      if (window.scrollY < 100) {
+        currentSection = "#home";
+      }
+
+      setActiveSection(currentSection);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const handleNavClick = (href: string) => {
     setIsOpen(false);
     if (href.startsWith('#')) {
@@ -60,7 +95,9 @@ export function Navigation() {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg border-b border-white/20 shadow-sm">
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        isScrolled ? 'bg-white/90 backdrop-blur-lg border-b shadow-md' : 'bg-transparent border-b border-transparent'
+    }`}>
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
@@ -75,7 +112,9 @@ export function Navigation() {
             <button
               key={item.href}
               onClick={() => handleNavClick(item.href)}
-              className="text-gray-600 hover:text-primary transition-colors"
+              className={`font-medium transition-colors ${
+                activeSection === item.href ? 'text-primary' : isScrolled ? 'text-gray-700 hover:text-primary' : 'text-white hover:text-white/80'
+              }`}
             >
               {item.label}
             </button>
@@ -115,7 +154,7 @@ export function Navigation() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Button onClick={() => handleNavClick(route('login'))}>Login</Button>
+            <Button onClick={() => handleNavClick(route('login'))} variant={isScrolled ? 'default' : 'secondary'}>Login</Button>
           )}
         </div>
 
@@ -127,30 +166,52 @@ export function Navigation() {
             </Button>
           </SheetTrigger>
           <SheetContent side="right" className="w-80">
-            <div className="flex flex-col space-y-4 mt-8">
-              {[...navItems, !auth.user && { href: route('login'), label: 'Login', icon: User }].filter(Boolean).map((item) => {
-                const Icon = item.icon;
-                return (
-                  <button
-                    key={item.href}
-                    onClick={() => handleNavClick(item.href)}
-                    className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 transition-colors"
-                  >
-                    <Icon className="h-5 w-5 text-primary" />
-                    <span>{item.label}</span>
-                  </button>
-                );
-              })}
-              {auth.user && (
-                <>
-                    <div className="px-3 pt-4">
-                        <div className="h-px bg-gray-200" />
-                    </div>
-                    <button onClick={handleLogout} className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 transition-colors text-red-500">
-                        <LogOut className="h-5 w-5" />
-                        <span>Log out</span>
+            <div className="flex flex-col h-full">
+              <div className="flex-grow mt-8 space-y-2">
+                {navItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      key={item.href}
+                      onClick={() => handleNavClick(item.href)}
+                      className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-colors text-left ${activeSection === item.href ? 'bg-primary/10 text-primary' : 'hover:bg-gray-100'}`}
+                    >
+                      <Icon className="h-5 w-5 text-primary" />
+                      <span className="font-medium">{item.label}</span>
                     </button>
-                </>)}
+                  );
+                })}
+              </div>
+
+              <div className="mt-auto mb-6">
+                <div className="h-px bg-gray-200 my-4" />
+                {auth.user ? (
+                  <div className="space-y-2">
+                    {auth.user.is_admin && (
+                      <Link href={route('dashboard')} onClick={() => setIsOpen(false)} className="w-full flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 transition-colors text-left">
+                        <LayoutDashboard className="h-5 w-5 text-gray-600" />
+                        <span className="font-medium">Dashboard</span>
+                      </Link>
+                    )}
+                    <button onClick={handleLogout} className="w-full flex items-center space-x-3 p-3 rounded-lg hover:bg-red-50 transition-colors text-left text-red-600">
+                        <LogOut className="h-5 w-5" />
+                        <span className="font-medium">Log out</span>
+                    </button>
+                    <div className="flex items-center gap-3 pt-4 px-3">
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage src={`https://ui-avatars.com/api/?name=${auth.user.name}&background=random`} alt={auth.user.name} />
+                        <AvatarFallback>{auth.user.name.substring(0, 2)}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col">
+                        <p className="text-sm font-semibold leading-none">{auth.user.name}</p>
+                        <p className="text-xs leading-none text-muted-foreground">{auth.user.email}</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <Button onClick={() => handleNavClick(route('login'))} className="w-full">Login</Button>
+                )}
+              </div>
             </div>
           </SheetContent>
         </Sheet>

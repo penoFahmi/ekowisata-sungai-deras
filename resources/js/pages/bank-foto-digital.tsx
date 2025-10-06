@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { usePage, router, Link } from "@inertiajs/react";
 import { useDebounce } from "use-debounce";
-import { Navigation } from "../components/landing-page/navigation";
+// import { Navigation } from "../components/landing-page/navigation";
+import { Header } from "@/components/bank-foto/Header";
 import { HeroSection } from "../components/bank-foto/HeroSection";
 import { SearchFilters } from "../components/bank-foto/SearchFilters";
 import { PhotoGallery } from "../components/bank-foto/PhotoGallery";
@@ -107,7 +108,8 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50">
-      <Navigation />
+      {/* <Navigation /> */}
+      <Header />
       <ModalFormPhoto
           isOpen={photoUploadModal.isOpen}
           onClose={photoUploadModal.onClose}
