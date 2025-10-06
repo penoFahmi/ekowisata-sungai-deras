@@ -15,6 +15,16 @@ Route::get('/', [LandingPageController::class, 'index'])->name('home');
 Route::get('bank-foto', [BankFotoController::class, 'index'])->name('bank-foto');
 Route::post('bank-foto/{photo}/download', [BankFotoController::class, 'download'])->name('bank-foto.download');
 
+// Route::get('wisata-list/wisata', function () {
+//     return Inertia::render('wisata-list/wisata');
+// })->name('wisata-list/wisata');
+// Route::get('wisata-list/umkm', function () {
+//     return Inertia::render('wisata-list/umkm');
+// })->name('wisata-list/umkm');
+// Route::get('wisata-list/agenda', function () {
+//     return Inertia::render('wisata-list/agenda');
+// })->name('wisata-list/agenda');
+
 // Rute sementara untuk membuat storage link di hosting
 Route::get('/storage-link', function () {
     $targetFolder = storage_path('app/public');
@@ -24,20 +34,19 @@ Route::get('/storage-link', function () {
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('setting', function () {
-        return Inertia::render('dashboard/setting');
-    })->name('setting');
 
     Route::post('bank-foto', [BankFotoController::class, 'store'])->name('bank-foto.store');
     Route::post('bank-foto/{photo}/like', [BankFotoController::class, 'like'])->name('bank-foto.like');
 
-
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::resource('users', UserController::class)->except(['create', 'edit', 'show']);
     Route::resource('kategori', CategoryController::class)->except(['create', 'edit', 'show']);
     Route::resource('wisata', TourismSpotController::class)->except(['create', 'edit', 'show']);
     Route::resource('umkm', UmkmController::class)->except(['create', 'edit', 'show']);
     Route::resource('agenda', AgendaController::class)->except(['create', 'edit', 'show']);
+    Route::get('setting', function () {
+        return Inertia::render('dashboard/setting');
+    })->name('setting');
 
 });
 

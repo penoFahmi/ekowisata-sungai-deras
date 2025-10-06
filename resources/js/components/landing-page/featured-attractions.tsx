@@ -1,9 +1,10 @@
+import { Link } from "@inertiajs/react";
 import { TourismSpot } from "@/types";
 import { Card, CardContent, CardFooter, CardHeader } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { ImageWithFallback } from "../figma/ImageWithFallback";
 import { Button } from "../ui/button";
-import { ArrowRight, Mountain } from "lucide-react";
+import { ArrowRight, Mountain, MapPin } from "lucide-react";
 
 interface FeaturedAttractionsProps {
     tourismSpots: TourismSpot[];
@@ -20,7 +21,7 @@ export function FeaturedAttractions({ tourismSpots }: FeaturedAttractionsProps) 
     };
 
     return (
-        <section id="wisata" className="py-20 bg-muted/30">
+        <section id="wisata-unggulan" className="py-20 bg-muted/30">
             <div className="container mx-auto px-4">
                 <div className="text-center mb-16">
                     <div className="flex justify-center items-center gap-2 mb-4">
@@ -50,18 +51,32 @@ export function FeaturedAttractions({ tourismSpots }: FeaturedAttractionsProps) 
                             </CardHeader>
                             <CardContent className="p-6 flex-grow">
                                 <h3 className="text-xl font-semibold mb-2">{spot.name}</h3>
-                                <p className="text-muted-foreground line-clamp-3">
+                                <div className="flex items-start text-sm text-muted-foreground mb-3">
+                                    <MapPin className="w-4 h-4 mr-2 mt-1 flex-shrink-0" />
+                                    <span>{spot.address}</span>
+                                </div>
+                                <p className="text-muted-foreground line-clamp-2">
                                     {spot.description}
                                 </p>
                             </CardContent>
                             <CardFooter className="p-6 pt-0">
-                                <Button variant="outline" className="w-full" onClick={handleViewOnMap}>
-                                    Lihat di Peta
-                                    <ArrowRight className="w-4 h-4 ml-2" />
-                                </Button>
+                                <div className="flex w-full space-x-2">
+                                    <Button asChild variant="outline" className="flex-1">
+                                        <Link href={`/wisata/${spot.id}`}>Lihat Detail</Link>
+                                    </Button>
+                                    <Button className="flex-1" onClick={handleViewOnMap}>
+                                        Lihat di Peta
+                                        <ArrowRight className="w-4 h-4 ml-2" />
+                                    </Button>
+                                </div>
                             </CardFooter>
                         </Card>
                     ))}
+                </div>
+                <div className="text-center mt-12">
+                    <Button asChild size="lg">
+                        <Link href="/wisata">Lihat Semua Wisata <ArrowRight className="w-5 h-5 ml-2" /></Link>
+                    </Button>
                 </div>
             </div>
         </section>

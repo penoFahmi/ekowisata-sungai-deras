@@ -43,10 +43,8 @@ export function Header() {
     <header className="border-b border-white/10 bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/60 sticky top-0 z-50 shadow-sm">
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                <Camera className="h-5 w-5 text-white" />
-              </div>
+          <Link href={route('bank-foto')} className="flex items-center gap-3">
+              <img src="/logo-pmm.PNG" alt="Logo PMM" className="h-10 w-auto rounded-md" />
               <div>
                 <h1 className="font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">PhotoBank</h1>
                 <p className="text-xs text-muted-foreground -mt-1">Desa Sungai Deras</p>

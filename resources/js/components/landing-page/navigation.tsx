@@ -100,10 +100,10 @@ export function Navigation() {
     }`}>
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-            <MapPin className="w-5 h-5 text-white" />
-          </div>
-          <h1 className="text-xl font-bold text-primary">Desa Sungai Deras</h1>
+          <img src="/logo-pmm.PNG" alt="Logo PMM" className="h-9 w-auto" />
+          <h1 className={`text-xl font-bold transition-colors ${
+              isScrolled ? 'text-primary' : 'text-white'
+          }`}>Desa Sungai Deras</h1>
         </div>
 
         {/* Desktop Navigation */}

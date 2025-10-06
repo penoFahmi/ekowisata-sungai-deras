@@ -37,12 +37,25 @@ export default function ModalFormPhoto({ isOpen, onClose, onSuccess }: ModalForm
     });
 
     const [tagInput, setTagInput] = useState('');
+    const [preview, setPreview] = useState<string | null>(null);
 
     useEffect(() => {
         if (!isOpen) {
             reset();
         }
     }, [isOpen]);
+
+    useEffect(() => {
+        if (data.image) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPreview(reader.result as string);
+            };
+            reader.readAsDataURL(data.image);
+        } else {
+            setPreview(null);
+        }
+    }, [data.image]);
 
     const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter' && tagInput.trim() !== '') {
@@ -106,7 +119,16 @@ export default function ModalFormPhoto({ isOpen, onClose, onSuccess }: ModalForm
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="image">File Gambar</Label>
-                            <Input id="image" type="file" accept="image/*" onChange={e => setData('image', e.target.files ? e.target.files[0] : null)} />
+                            <Input
+                                id="image"
+                                type="file"
+                                accept="image/*"
+                                onChange={e => {
+                                    const file = e.target.files ? e.target.files[0] : null;
+                                    setData('image', file);
+                                }}
+                            />
+                            {preview && <img src={preview} alt="Preview" className="mt-2 rounded-md max-h-48 object-cover" />}
                             {progress && (
                                 <div className="w-full bg-gray-200 rounded-full mt-2">
                                     <div className="bg-purple-600 text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full" style={{ width: `${progress.percentage}%` }} />

@@ -3,6 +3,7 @@ import { usePage, router, Link } from "@inertiajs/react";
 import { useDebounce } from "use-debounce";
 // import { Navigation } from "../components/landing-page/navigation";
 import { Header } from "@/components/bank-foto/Header";
+import { Footer} from "@/components/landing-page/footer";
 import { HeroSection } from "../components/bank-foto/HeroSection";
 import { SearchFilters } from "../components/bank-foto/SearchFilters";
 import { PhotoGallery } from "../components/bank-foto/PhotoGallery";
@@ -14,6 +15,7 @@ import { usePhotoUploadModal } from '@/hooks/use-photo-upload-modal';
 import { PageProps, PaginatedResponse } from "@/types";
 import { route } from "ziggy-js"
 import { toast } from 'sonner';
+// import { Footer } from "react-day-picker";
 
 interface Photo {
   id: number;
@@ -180,13 +182,14 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white/80 backdrop-blur-sm border-t border-purple-100 mt-20">
+      {/* <footer className="bg-white/80 backdrop-blur-sm border-t border-purple-100 mt-20">
         <div className="container mx-auto px-4 py-8">
           <div className="text-center text-gray-600">
             <p>© 2025 PhotoBank Desa Sungai Deras. Menampilkan keindahan kerajinan dan wisata nusantara.</p>
           </div>
         </div>
-      </footer>
+      </footer> */}
+      <Footer/>
     </div>
   );
 }
