@@ -1,8 +1,14 @@
 import { Card, CardContent } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
-import { Download, Heart, Eye, Star, MoreHorizontal } from "lucide-react";
+import { Download, Heart, Eye, Star, MoreHorizontal, Trash2, Edit } from "lucide-react";
 import { ImageWithFallback } from "../figma/ImageWithFallback";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface PhotoCardProps {
   id: string;
@@ -14,6 +20,11 @@ interface PhotoCardProps {
   likes: number;
   views: number;
   photographer: string;
+  is_liked: boolean;
+  onLike?: (id: string) => void;
+  onDownload?: (id: string) => void;
+  onEdit?: (id: string) => void;
+  onDelete?: (id: string) => void;
 }
 
 export function PhotoCard({
@@ -24,7 +35,12 @@ export function PhotoCard({
   downloads,
   likes,
   views,
-  photographer
+  photographer,
+  is_liked,
+  onLike,
+  onDownload,
+  onEdit,
+  onDelete,
 }: PhotoCardProps) {
   const getCategoryGradient = (category: string) => {
     return category === "kerajinan"
@@ -42,18 +58,31 @@ export function PhotoCard({
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-        {/* Top Actions */}
         <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-          <Button size="sm" variant="secondary" className="h-8 w-8 p-0 bg-white/90 hover:bg-white backdrop-blur-sm shadow-lg">
-            <Heart className="h-4 w-4 text-red-500" />
+          <Button size="sm" variant="secondary" className="h-8 w-8 p-0 bg-white/90 hover:bg-white backdrop-blur-sm shadow-lg" onClick={() => onLike?.(id)}>
+            <Heart className={`h-4 w-4 ${is_liked ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
           </Button>
-          <Button size="sm" variant="secondary" className="h-8 w-8 p-0 bg-white/90 hover:bg-white backdrop-blur-sm shadow-lg">
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
+          {(onEdit || onDelete) && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size="sm" variant="secondary" className="h-8 w-8 p-0 bg-white/90 hover:bg-white backdrop-blur-sm shadow-lg">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {onEdit && <DropdownMenuItem onClick={() => onEdit(id)} className="cursor-pointer">
+                  <Edit className="mr-2 h-4 w-4" /> Edit
+                </DropdownMenuItem>}
+                {onDelete && <DropdownMenuItem onClick={() => onDelete(id)} className="cursor-pointer text-red-500 focus:text-red-600">
+                  <Trash2 className="mr-2 h-4 w-4" /> Hapus
+                </DropdownMenuItem>}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
 
         {/* Bottom Download Button */}
-        <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+        <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0" onClick={() => onDownload?.(id)}>
           <Button size="sm" className={`bg-gradient-to-r ${getCategoryGradient(category)} hover:scale-105 shadow-lg`}>
             <Download className="h-4 w-4 mr-1" />
             Download
@@ -107,11 +136,11 @@ export function PhotoCard({
               <Eye className="h-3 w-3" />
               <span>{views.toLocaleString()}</span>
             </div>
-            <div className="flex items-center gap-1 hover:text-red-500 transition-colors">
-              <Heart className="h-3 w-3" />
+            <div className="flex items-center gap-1 hover:text-red-500 transition-colors" onClick={() => onLike?.(id)}>
+              <Heart className={`h-3 w-3 ${is_liked ? 'fill-red-500 text-red-500' : ''}`} />
               <span>{likes.toLocaleString()}</span>
             </div>
-            <div className="flex items-center gap-1 hover:text-green-600 transition-colors">
+            <div className="flex items-center gap-1 hover:text-green-600 transition-colors" onClick={() => onDownload?.(id)}>
               <Download className="h-3 w-3" />
               <span>{downloads.toLocaleString()}</span>
             </div>

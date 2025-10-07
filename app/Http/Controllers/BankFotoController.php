@@ -7,6 +7,7 @@ use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -136,5 +137,78 @@ class BankFotoController extends Controller
         $photo->increment('downloads');
 
         return Storage::disk('public')->download($photo->image_path);
+    }
+
+    public function update(Request $request, Photo $photo)
+    {
+        Gate::authorize('update', $photo);
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'category' => 'required|in:kerajinan,wisata',
+            'tags' => 'nullable|array',
+            'tags.*' => 'string|max:50',
+        ]);
+
+        $photo->update([
+            'title' => $validated['title'],
+            'description' => $validated['description'],
+            'category' => $validated['category'],
+        ]);
+
+        if (!empty($validated['tags'])) {
+            $tagIds = [];
+            foreach ($validated['tags'] as $tagName) {
+                $tag = Tag::firstOrCreate(
+                    ['slug' => Str::slug($tagName)],
+                    ['name' => $tagName]
+                );
+                $tagIds[] = $tag->id;
+            }
+            $photo->tags()->sync($tagIds);
+        } else {
+            $photo->tags()->sync([]);
+        }
+
+        return back()->with('success', 'Detail foto berhasil diperbarui.');
+    }
+
+    public function profile(Request $request)
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        $photos = $user->photos()
+            ->with(['user', 'tags'])
+            // Selalu true karena ini foto milik user, tapi kita jaga untuk konsistensi
+            ->withExists(['likers as is_liked' => fn ($q) => $q->where('user_id', $user->id)])
+            ->latest()
+            ->paginate(12)
+            ->withQueryString();
+
+        $stats = [
+            'totalPhotos' => $user->photos()->count(),
+            'totalLikes' => $user->photos()->sum('likes'),
+            'totalDownloads' => $user->photos()->sum('downloads'),
+            'totalViews' => $user->photos()->sum('views'),
+        ];
+
+        return Inertia::render('bank-foto/profile', [
+            'photos' => $photos,
+            'stats' => $stats,
+        ]);
+    }
+
+    public function destroy(Photo $photo)
+    {
+        Gate::authorize('delete', $photo);
+
+        // Hapus file dari storage
+        Storage::disk('public')->delete($photo->image_path);
+
+        $photo->delete();
+
+        return back()->with('success', 'Foto berhasil dihapus.');
     }
 }

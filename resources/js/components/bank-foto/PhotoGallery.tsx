@@ -10,14 +10,19 @@ interface Photo {
   likes: number;
   views: number;
   photographer: string;
+  is_liked: boolean;
 }
 
 interface PhotoGalleryProps {
   photos: Photo[];
   loading?: boolean;
+  onLike?: (id: string) => void;
+  onDownload?: (id: string) => void;
+  onEdit?: (id: string) => void;
+  onDelete?: (id: string) => void;
 }
 
-export function PhotoGallery({ photos, loading }: PhotoGalleryProps) {
+export function PhotoGallery({ photos, loading, onLike, onDownload, onEdit, onDelete }: PhotoGalleryProps) {
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -55,7 +60,14 @@ export function PhotoGallery({ photos, loading }: PhotoGalleryProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {photos.map((photo) => (
-        <PhotoCard key={photo.id} {...photo} />
+        <PhotoCard
+          key={photo.id}
+          {...photo}
+          onLike={onLike}
+          onDownload={onDownload}
+          onEdit={onEdit}
+          onDelete={onDelete}
+        />
       ))}
     </div>
   );

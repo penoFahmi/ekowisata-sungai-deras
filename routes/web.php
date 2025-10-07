@@ -33,6 +33,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('bank-foto', [BankFotoController::class, 'store'])->name('bank-foto.store');
     Route::post('bank-foto/{photo}/like', [BankFotoController::class, 'like'])->name('bank-foto.like');
+    Route::put('bank-foto/{photo}', [BankFotoController::class, 'update'])->name('bank-foto.update');
+    Route::delete('bank-foto/{photo}', [BankFotoController::class, 'destroy'])->name('bank-foto.destroy');
+    Route::get('bank-foto/profile', [BankFotoController::class, 'profile'])->name('bank-foto.profile');
 
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::resource('users', UserController::class)->except(['create', 'edit', 'show']);
