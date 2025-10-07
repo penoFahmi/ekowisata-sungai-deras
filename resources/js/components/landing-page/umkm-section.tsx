@@ -12,6 +12,7 @@ import {
   Filter
 } from "lucide-react";
 import { ImageWithFallback } from "../figma/ImageWithFallback";
+import { Link } from "@inertiajs/react";
 
 interface UMKMSectionProps {
   umkms: Umkm[];
@@ -132,9 +133,11 @@ export function UMKMSection({ umkms }: UMKMSectionProps) {
 
         {/* Show More Button */}
         <div className="text-center">
-          <Button size="lg" onClick={handleViewDirectory}>
+          <Button asChild size="lg">
+            <Link href={route('umkm-list.index')}>
             Lihat Semua UMKM
             <ArrowRight className="w-5 h-5 ml-2" />
+            </Link>
           </Button>
         </div>
 

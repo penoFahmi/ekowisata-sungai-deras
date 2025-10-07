@@ -1,4 +1,4 @@
-import { Link, Head, usePage } from '@inertiajs/react';
+import { Link, Head, usePage, router } from '@inertiajs/react';
 import { Navigation } from '@/components/landing-page/navigation';
 import { Footer } from '@/components/landing-page/footer';
 import { PageProps, PaginatedResponse, TourismSpot } from '@/types';
@@ -6,24 +6,48 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, MapPin, Mountain } from 'lucide-react';
+import { ArrowRight, MapPin, Mountain, Search } from 'lucide-react';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink } from '@/components/ui/pagination';
+import { Input } from '@/components/ui/input';
+import { useState, useEffect, useRef } from 'react';
+import { useDebounce } from 'use-debounce';
+import { route } from 'ziggy-js';
+import { WisataDetailModal } from '@/components/wisata/WisataDetailModal';
+import { HeroSectionSecond } from '@/components/landing-page/hero-section-second';
 
 interface WisataIndexProps extends PageProps {
     tourismSpots: PaginatedResponse<TourismSpot>;
+    filters: {
+        search?: string;
+    }
 }
 
 export default function WisataIndex() {
-    const { tourismSpots } = usePage<WisataIndexProps>().props;
+    const { tourismSpots, filters } = usePage<WisataIndexProps>().props;
+    const [searchTerm, setSearchTerm] = useState(filters.search || '');
+    const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
+    const isInitialMount = useRef(true);
+    const [selectedSpot, setSelectedSpot] = useState<TourismSpot | null>(null);
 
     const getImageUrl = (path: string | undefined) => {
         return path ? `/storage/${path}` : 'https://placehold.co/600x400/png?text=Wisata';
     };
 
+    useEffect(() => {
+        if (isInitialMount.current) {
+            isInitialMount.current = false;
+            return;
+        }
+
+        router.get(route('wisata-list.index'), { search: debouncedSearchTerm }, { preserveState: true, replace: true, preserveScroll: true });
+
+    }, [debouncedSearchTerm]);
+
     return (
         <div className="min-h-screen bg-background">
             <Head title="Semua Wisata" />
             <Navigation />
+            <HeroSectionSecond />
             <main className="pt-24 pb-12">
                 <section id="semua-wisata" className="py-10 bg-muted/30">
                     <div className="container mx-auto px-4">
@@ -38,6 +62,30 @@ export default function WisataIndex() {
                                 Temukan dan jelajahi setiap sudut keindahan yang ditawarkan oleh Desa Sungai Deras.
                             </p>
                         </div>
+
+                        {/* Search Input */}
+                        <div className="mb-12 max-w-lg mx-auto">
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                <Input
+                                    type="search"
+                                    placeholder="Cari nama atau deskripsi wisata..."
+                                    className="pl-10 h-12 text-base"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                            </div>
+                        </div>
+
+                        {tourismSpots.data.length === 0 && (
+                            <div className="text-center py-12">
+                                <h3 className="text-xl font-semibold mb-2">Wisata Tidak Ditemukan</h3>
+                                <p className="text-muted-foreground">
+                                    Coba gunakan kata kunci lain untuk menemukan destinasi yang Anda cari.
+                                </p>
+                            </div>
+                        )}
+
 
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
                             {tourismSpots.data.map((spot) => (
@@ -64,8 +112,8 @@ export default function WisataIndex() {
                                         </p>
                                     </CardContent>
                                     <CardFooter className="p-6 pt-0">
-                                        <Button asChild className="w-full">
-                                            <Link href={route('wisata-list.show', spot.id)}>Lihat Detail <ArrowRight className="w-4 h-4 ml-2" /></Link>
+                                        <Button className="w-full" onClick={() => setSelectedSpot(spot)}>
+                                            Lihat Detail <ArrowRight className="w-4 h-4 ml-2" />
                                         </Button>
                                     </CardFooter>
                                 </Card>
@@ -73,20 +121,24 @@ export default function WisataIndex() {
                         </div>
 
                         {/* Pagination */}
-                        <Pagination>
-                            <PaginationContent>
-                                {tourismSpots.links.map((link, index) => (
-                                    <PaginationItem key={index} className={!link.url ? 'opacity-50 pointer-events-none' : ''}>
-                                        <PaginationLink asChild isActive={link.active}>
-                                            <Link href={link.url || '#'} dangerouslySetInnerHTML={{ __html: link.label }} />
-                                        </PaginationLink>
-                                    </PaginationItem>
-                                ))}
-                            </PaginationContent>
-                        </Pagination>
+                        {tourismSpots.data.length > 0 && (
+                            <Pagination>
+                                <PaginationContent>
+                                    {tourismSpots.links.map((link, index) => (
+                                        <PaginationItem key={index} className={!link.url ? 'opacity-50 pointer-events-none' : ''}>
+                                            <PaginationLink asChild isActive={link.active}>
+                                                <Link href={link.url || '#'} dangerouslySetInnerHTML={{ __html: link.label }} preserveState preserveScroll />
+                                            </PaginationLink>
+                                        </PaginationItem>
+                                    ))}
+                                </PaginationContent>
+                            </Pagination>
+                        )}
                     </div>
                 </section>
             </main>
+
+            <WisataDetailModal spot={selectedSpot} isOpen={!!selectedSpot} onClose={() => setSelectedSpot(null)} />
             <Footer />
         </div>
     );

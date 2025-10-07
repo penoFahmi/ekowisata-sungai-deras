@@ -2,7 +2,8 @@ import { Agenda } from "@/types";
 import { Card, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
-import { Calendar, MapPin, Clock } from "lucide-react";
+import { Calendar, MapPin, Clock, ArrowRight } from "lucide-react";
+import { Link } from "@inertiajs/react";
 
 interface EventsSectionProps {
   agendas: Agenda[];
@@ -75,8 +76,10 @@ export function EventsSection({ agendas }: EventsSectionProps) {
         </div>
 
         <div className="text-center mt-12">
-          <Button variant="outline" size="lg">
-            Lihat Semua Agenda
+          <Button asChild variant="outline" size="lg">
+            <Link href={route('agenda-list.index')}>
+              Lihat Semua Agenda <ArrowRight className="w-4 h-4 ml-2" />
+            </Link>
           </Button>
         </div>
       </div>

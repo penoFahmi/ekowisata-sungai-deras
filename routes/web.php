@@ -14,6 +14,10 @@ use Inertia\Inertia;
 Route::get('/', [LandingPageController::class, 'index'])->name('home');
 Route::get('wisata-list', [LandingPageController::class, 'tourismIndex'])->name('wisata-list.index');
 Route::get('wisata-list/{tourismSpot}', [LandingPageController::class, 'tourismShow'])->name('wisata-list.show');
+Route::get('umkm-list', [LandingPageController::class, 'umkmIndex'])->name('umkm-list.index');
+Route::get('umkm-list/{umkm}', [LandingPageController::class, 'umkmShow'])->name('umkm-list.show');
+Route::get('agenda-list', [LandingPageController::class, 'agendaIndex'])->name('agenda-list.index');
+Route::get('agenda-list/{agenda}', [LandingPageController::class, 'agendaShow'])->name('agenda-list.show');
 Route::get('bank-foto', [BankFotoController::class, 'index'])->name('bank-foto');
 Route::post('bank-foto/{photo}/download', [BankFotoController::class, 'download'])->name('bank-foto.download');
 
