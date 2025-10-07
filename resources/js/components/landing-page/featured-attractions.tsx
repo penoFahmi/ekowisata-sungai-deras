@@ -58,24 +58,22 @@ export function FeaturedAttractions({ tourismSpots }: FeaturedAttractionsProps) 
                                 <p className="text-muted-foreground line-clamp-2">
                                     {spot.description}
                                 </p>
-                            </CardContent>
-                            <CardFooter className="p-6 pt-0">
-                                <div className="flex w-full space-x-2">
+                                <div className="flex space-x-2">
                                     <Button asChild variant="outline" className="flex-1">
-                                        <Link href={`/wisata/${spot.id}`}>Lihat Detail</Link>
+                                        <Link href={route('wisata-list.show', spot.id)}>Lihat Detail</Link>
                                     </Button>
-                                    <Button className="flex-1" onClick={handleViewOnMap}>
+                                    <Button onClick={handleViewOnMap} className="flex-1">
                                         Lihat di Peta
                                         <ArrowRight className="w-4 h-4 ml-2" />
                                     </Button>
                                 </div>
-                            </CardFooter>
+                            </CardContent>
                         </Card>
                     ))}
                 </div>
                 <div className="text-center mt-12">
                     <Button asChild size="lg">
-                        <Link href="/wisata">Lihat Semua Wisata <ArrowRight className="w-5 h-5 ml-2" /></Link>
+                        <Link href={route('wisata-list.index')}>Lihat Semua Wisata <ArrowRight className="w-5 h-5 ml-2" /></Link>
                     </Button>
                 </div>
             </div>

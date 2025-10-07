@@ -12,18 +12,10 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', [LandingPageController::class, 'index'])->name('home');
+Route::get('wisata-list', [LandingPageController::class, 'tourismIndex'])->name('wisata-list.index');
+Route::get('wisata-list/{tourismSpot}', [LandingPageController::class, 'tourismShow'])->name('wisata-list.show');
 Route::get('bank-foto', [BankFotoController::class, 'index'])->name('bank-foto');
 Route::post('bank-foto/{photo}/download', [BankFotoController::class, 'download'])->name('bank-foto.download');
-
-// Route::get('wisata-list/wisata', function () {
-//     return Inertia::render('wisata-list/wisata');
-// })->name('wisata-list/wisata');
-// Route::get('wisata-list/umkm', function () {
-//     return Inertia::render('wisata-list/umkm');
-// })->name('wisata-list/umkm');
-// Route::get('wisata-list/agenda', function () {
-//     return Inertia::render('wisata-list/agenda');
-// })->name('wisata-list/agenda');
 
 // Rute sementara untuk membuat storage link di hosting
 Route::get('/storage-link', function () {

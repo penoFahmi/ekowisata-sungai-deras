@@ -36,24 +36,24 @@ class LandingPageController extends Controller
         return Inertia::render('App', compact('tourismSpots', 'umkms', 'agendas'));
     }
 
-    // public function tourismIndex(Request $request)
-    // {
-    //     $tourismSpots = TourismSpot::with(['category', 'galleries'])
-    //         ->latest()
-    //         ->paginate(9) // Menampilkan 9 item per halaman
-    //         ->withQueryString();
+    public function tourismIndex(Request $request)
+    {
+        $tourismSpots = TourismSpot::with(['category', 'galleries'])
+            ->latest()
+            ->paginate(9) // Menampilkan 9 item per halaman
+            ->withQueryString();
 
-    //     return Inertia::render('wisata-list/wisata', [
-    //         'tourismSpots' => $tourismSpots,
-    //     ]);
-    // }
+        return Inertia::render('wisata-list/wisata', [
+            'tourismSpots' => $tourismSpots,
+        ]);
+    }
 
-    // public function tourismShow(TourismSpot $spot)
-    // {
-    //     $spot->load(['category', 'galleries']);
+    public function tourismShow(TourismSpot $tourismSpot)
+    {
+        $tourismSpot->load(['category', 'galleries']);
 
-    //     return Inertia::render('wisata-list/show', [
-    //         'spot' => $spot,
-    //     ]);
-    // }
+        return Inertia::render('wisata-list/wisata-detail', [
+            'tourismSpot' => $tourismSpot,
+        ]);
+    }
 }
