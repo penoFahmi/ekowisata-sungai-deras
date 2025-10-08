@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
+import axios from 'axios';
 import { usePage, router, Link } from "@inertiajs/react";
 import { useDebounce } from "use-debounce";
-// import { Navigation } from "../components/landing-page/navigation";
 import { Header } from "@/components/bank-foto/Header";
 import { Footer} from "@/components/landing-page/footer";
 import { HeroSection } from "../components/bank-foto/HeroSection";
@@ -12,10 +12,10 @@ import { CategorySection } from "../components/bank-foto/CategorySection";
 import { Pagination, PaginationContent, PaginationItem } from "@/components/ui/pagination";
 import ModalFormPhoto from '@/components/bank-foto/ModalFormPhoto';
 import { usePhotoUploadModal } from '@/hooks/use-photo-upload-modal';
+import ModalPhotoDetail from '@/components/bank-foto/ModalPhotoDetail';
 import { PageProps, PaginatedResponse } from "@/types";
 import { route } from "ziggy-js"
 import { toast } from 'sonner';
-// import { Footer } from "react-day-picker";
 
 interface Photo {
   id: number;
@@ -27,6 +27,7 @@ interface Photo {
   likes: number;
   views: number;
   user: { name: string };
+  is_liked: boolean;
 }
 
 interface BankFotoPageProps extends PageProps {
@@ -62,6 +63,9 @@ export default function App() {
   });
   const [sortBy, setSortBy] = useState(filters.sort || "newest");
 
+  const [selectedPhoto, setSelectedPhoto] = useState<any | null>(null);
+  const [isDetailModalOpen, setDetailModalOpen] = useState(false);
+
   const [debouncedSearch] = useDebounce(searchQuery, 300);
 
   useEffect(() => {
@@ -77,8 +81,8 @@ export default function App() {
     if (selectedCategory !== "all") queryParams.category = selectedCategory;
     if (selectedTags.length > 0) queryParams.tags = selectedTags;
     if (sortBy !== "newest") queryParams.sort = sortBy;
-
-    router.get(route('bank-foto'), queryParams, {
+    // FIX: Use the correct route name 'bank-foto.index'
+    router.get(route('bank-foto.index'), queryParams, {
       preserveState: true,
       replace: true,
     });
@@ -92,6 +96,34 @@ export default function App() {
     );
   };
 
+  const handleLike = (photoId: string) => {
+    router.post(route('bank-foto.like', photoId), {}, {
+      preserveScroll: true,
+    });
+  };
+
+  const handleDownload = (photoId: string) => {
+    window.open(route('bank-foto.download', photoId), '_blank');
+  };
+
+  const handlePhotoClick = async (photoId: string) => {
+    setDetailModalOpen(true);
+    try {
+      const response = await axios.get(route('bank-foto.show', photoId));
+      setSelectedPhoto(response.data);
+      // Optimistically update the view count on the gallery
+      router.reload({ only: ['photos'], preserveState: true, preserveScroll: true });
+    } catch (error) {
+      console.error("Failed to fetch photo details:", error);
+      toast.error("Gagal memuat detail foto.");
+      setDetailModalOpen(false);
+    }
+  };
+
+  const closeDetailModal = () => {
+    setDetailModalOpen(false);
+    setSelectedPhoto(null);
+  };
   // Format photo data from the backend to match what the PhotoCard component expects
   const formattedPhotos = useMemo(() => {
     // FIX: Use optional chaining and a nullish coalescing operator to prevent crashes if photos.data is not present.
@@ -105,6 +137,7 @@ export default function App() {
       likes: photo.likes,
       views: photo.views,
       photographer: photo.user.name,
+      is_liked: photo.is_liked,
     }));
   }, [photos.data]);
 
@@ -116,6 +149,13 @@ export default function App() {
           isOpen={photoUploadModal.isOpen}
           onClose={photoUploadModal.onClose}
           onSuccess={() => router.reload({ only: ['photos', 'stats'], onSuccess: () => toast.success('Foto berhasil diunggah!') })}
+      />
+      <ModalPhotoDetail
+          isOpen={isDetailModalOpen}
+          onClose={closeDetailModal}
+          photo={selectedPhoto}
+          onLike={(id) => handleLike(id.toString())}
+          onDownload={(id) => handleDownload(id.toString())}
       />
       <HeroSection stats={stats} photos={formattedPhotos} />
 
@@ -162,7 +202,12 @@ export default function App() {
             )}
           </div>
 
-          <PhotoGallery photos={formattedPhotos} />
+          <PhotoGallery
+            photos={formattedPhotos}
+            onPhotoClick={handlePhotoClick}
+            onLike={handleLike}
+            onDownload={handleDownload}
+          />
 
           {/* Pagination */}
           <div className="mt-12">
@@ -180,15 +225,6 @@ export default function App() {
 
         </div>
       </main>
-
-      {/* Footer */}
-      {/* <footer className="bg-white/80 backdrop-blur-sm border-t border-purple-100 mt-20">
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center text-gray-600">
-            <p>© 2025 PhotoBank Desa Sungai Deras. Menampilkan keindahan kerajinan dan wisata nusantara.</p>
-          </div>
-        </div>
-      </footer> */}
       <Footer/>
     </div>
   );

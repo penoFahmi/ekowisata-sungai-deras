@@ -22,12 +22,14 @@ interface PhotoCardProps {
   photographer: string;
   is_liked: boolean;
   onLike?: (id: string) => void;
+  onClick?: (id: string) => void;
   onDownload?: (id: string) => void;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
 }
 
 export function PhotoCard({
+  id,
   title,
   category,
   tags,
@@ -38,6 +40,7 @@ export function PhotoCard({
   photographer,
   is_liked,
   onLike,
+  onClick,
   onDownload,
   onEdit,
   onDelete,
@@ -49,7 +52,7 @@ export function PhotoCard({
   };
 
   return (
-    <Card className="overflow-hidden group hover:shadow-2xl hover:shadow-purple-500/10 transition-all duration-500 border-0 bg-white/80 backdrop-blur-sm hover:bg-white/90">
+    <Card onClick={() => onClick?.(id)} className="overflow-hidden group hover:shadow-2xl hover:shadow-purple-500/10 transition-all duration-500 border-0 bg-white/80 backdrop-blur-sm hover:bg-white/90 cursor-pointer">
       <div className="relative aspect-[4/3] overflow-hidden">
         <ImageWithFallback
           src={imageUrl}
@@ -58,14 +61,14 @@ export function PhotoCard({
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-        <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-          <Button size="sm" variant="secondary" className="h-8 w-8 p-0 bg-white/90 hover:bg-white backdrop-blur-sm shadow-lg" onClick={() => onLike?.(id)}>
+        <div className="absolute top-3 right-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0" onClick={e => e.stopPropagation()}>
+          <Button size="icon" variant="secondary" className="h-8 w-8 p-0 bg-white/90 hover:bg-white backdrop-blur-sm shadow-lg" onClick={() => onLike?.(id)}>
             <Heart className={`h-4 w-4 ${is_liked ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
           </Button>
           {(onEdit || onDelete) && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button size="sm" variant="secondary" className="h-8 w-8 p-0 bg-white/90 hover:bg-white backdrop-blur-sm shadow-lg">
+                <Button size="icon" variant="secondary" className="h-8 w-8 p-0 bg-white/90 hover:bg-white backdrop-blur-sm shadow-lg">
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -81,8 +84,8 @@ export function PhotoCard({
           )}
         </div>
 
-        {/* Bottom Download Button */}
-        <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0" onClick={() => onDownload?.(id)}>
+        {/* Bottom Download Button - Add stopPropagation to prevent card click */}
+        <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0" onClick={(e) => { e.stopPropagation(); onDownload?.(id); e.preventDefault(); }}>
           <Button size="sm" className={`bg-gradient-to-r ${getCategoryGradient(category)} hover:scale-105 shadow-lg`}>
             <Download className="h-4 w-4 mr-1" />
             Download
@@ -136,11 +139,11 @@ export function PhotoCard({
               <Eye className="h-3 w-3" />
               <span>{views.toLocaleString()}</span>
             </div>
-            <div className="flex items-center gap-1 hover:text-red-500 transition-colors" onClick={() => onLike?.(id)}>
+            <div className="flex items-center gap-1 hover:text-red-500 transition-colors cursor-pointer" onClick={(e) => { e.stopPropagation(); onLike?.(id); e.preventDefault(); }}>
               <Heart className={`h-3 w-3 ${is_liked ? 'fill-red-500 text-red-500' : ''}`} />
               <span>{likes.toLocaleString()}</span>
             </div>
-            <div className="flex items-center gap-1 hover:text-green-600 transition-colors" onClick={() => onDownload?.(id)}>
+            <div className="flex items-center gap-1 hover:text-green-600 transition-colors cursor-pointer" onClick={(e) => { e.stopPropagation(); onDownload?.(id); e.preventDefault(); }}>
               <Download className="h-3 w-3" />
               <span>{downloads.toLocaleString()}</span>
             </div>

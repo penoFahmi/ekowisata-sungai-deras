@@ -41,7 +41,7 @@ class AgendaController extends Controller
             'start_time' => 'required|date',
             'end_time' => 'required|date|after_or_equal:start_time',
             'location' => 'required|string|max:255',
-            'poster_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'poster_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp',
         ]);
 
         if ($request->hasFile('poster_image')) {
@@ -64,7 +64,7 @@ class AgendaController extends Controller
             'start_time' => 'required|date',
             'end_time' => 'required|date|after_or_equal:start_time',
             'location' => 'required|string|max:255',
-            'poster_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'poster_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp',
         ]);
 
         if ($request->hasFile('poster_image')) {

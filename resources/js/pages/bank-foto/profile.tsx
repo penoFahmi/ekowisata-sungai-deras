@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect } from "react";
 import { usePage, Link, router } from "@inertiajs/react";
+import axios from 'axios';
 import { Header } from "@/components/bank-foto/Header";
 import { Footer } from "@/components/landing-page/footer";
 import { PhotoGallery } from "@/components/bank-foto/PhotoGallery";
@@ -7,6 +8,7 @@ import { Pagination, PaginationContent, PaginationItem } from "@/components/ui/p
 import { PageProps, PaginatedResponse } from "@/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Camera, Download, Eye, Heart } from "lucide-react";
+import ModalPhotoDetail from "@/components/bank-foto/ModalPhotoDetail";
 import ModalEditPhoto from "@/components/bank-foto/ModalEditPhoto";
 import {
   AlertDialog,
@@ -49,6 +51,8 @@ export default function ProfilePage() {
 
   const [editingPhoto, setEditingPhoto] = useState<Photo | null>(null);
   const [deletingPhoto, setDeletingPhoto] = useState<Photo | null>(null);
+  const [selectedPhoto, setSelectedPhoto] = useState<any | null>(null);
+  const [isDetailModalOpen, setDetailModalOpen] = useState(false);
 
   useEffect(() => {
     if (flash?.success) {
@@ -108,6 +112,28 @@ export default function ProfilePage() {
     router.post(route('bank-foto.like', photoId), {}, { preserveScroll: true });
   };
 
+  const handleDownload = (photoId: string) => {
+    window.open(route('bank-foto.download', photoId), '_blank');
+  };
+
+  const handlePhotoClick = async (photoId: string) => {
+    setDetailModalOpen(true);
+    try {
+      const response = await axios.get(route('bank-foto.show', photoId));
+      setSelectedPhoto(response.data);
+      router.reload({ only: ['photos'], preserveState: true, preserveScroll: true });
+    } catch (error) {
+      console.error("Failed to fetch photo details:", error);
+      toast.error("Gagal memuat detail foto.");
+      setDetailModalOpen(false);
+    }
+  };
+
+  const closeDetailModal = () => {
+    setDetailModalOpen(false);
+    setSelectedPhoto(null);
+  };
+
   if (!user) {
     return <div>Loading...</div>;
   }
@@ -115,6 +141,13 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50">
       <ModalEditPhoto isOpen={!!editingPhoto} onClose={() => setEditingPhoto(null)} onSuccess={() => {}} photo={editingPhoto} />
+      <ModalPhotoDetail
+          isOpen={isDetailModalOpen}
+          onClose={closeDetailModal}
+          photo={selectedPhoto}
+          onLike={(id) => handleLike(id.toString())}
+          onDownload={(id) => handleDownload(id.toString())}
+      />
       <AlertDialog open={!!deletingPhoto} onOpenChange={() => setDeletingPhoto(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -162,9 +195,11 @@ export default function ProfilePage() {
           <h2 className="text-2xl font-bold text-gray-800">Foto Unggahan Saya</h2>
           <PhotoGallery
             photos={formattedPhotos}
+            onPhotoClick={handlePhotoClick}
             onEdit={handleEdit}
             onDelete={handleDelete}
             onLike={handleLike}
+            onDownload={handleDownload}
           />
 
           {/* Pagination */}

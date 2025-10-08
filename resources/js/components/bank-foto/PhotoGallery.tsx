@@ -16,13 +16,14 @@ interface Photo {
 interface PhotoGalleryProps {
   photos: Photo[];
   loading?: boolean;
+  onPhotoClick?: (id: string) => void;
   onLike?: (id: string) => void;
   onDownload?: (id: string) => void;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
 }
 
-export function PhotoGallery({ photos, loading, onLike, onDownload, onEdit, onDelete }: PhotoGalleryProps) {
+export function PhotoGallery({ photos, loading, onPhotoClick, onLike, onDownload, onEdit, onDelete }: PhotoGalleryProps) {
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -63,6 +64,7 @@ export function PhotoGallery({ photos, loading, onLike, onDownload, onEdit, onDe
         <PhotoCard
           key={photo.id}
           {...photo}
+          onClick={onPhotoClick}
           onLike={onLike}
           onDownload={onDownload}
           onEdit={onEdit}

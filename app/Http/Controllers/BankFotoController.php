@@ -85,9 +85,9 @@ class BankFotoController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'category' => 'required|in:kerajinan,wisata',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif',
             'tags' => 'nullable|array',
-            'tags.*' => 'string|max:50', // Bisa berupa ID atau nama tag baru
+            'tags.*' => 'string|max:50',
         ]);
 
         $imagePath = $request->file('image')->store('photos', 'public');
@@ -113,7 +113,7 @@ class BankFotoController extends Controller
             $photo->tags()->sync($tagIds);
         }
 
-        return redirect()->route('bank-foto')->with('success', 'Foto berhasil diunggah!');
+        return redirect()->route('bank-foto.index')->with('success', 'Foto berhasil diunggah!');
     }
 
     public function like(Photo $photo)
@@ -137,6 +137,26 @@ class BankFotoController extends Controller
         $photo->increment('downloads');
 
         return Storage::disk('public')->download($photo->image_path);
+    }
+
+    public function show(Photo $photo)
+    {
+        // Increment view count, tapi tidak untuk setiap refresh dari user yang sama dalam satu sesi.
+        $viewed = session()->get('viewed_photos', []);
+        if (!in_array($photo->id, $viewed)) {
+            $photo->increment('views');
+            session()->push('viewed_photos', $photo->id);
+        }
+
+        $photo->load(['user', 'tags']);
+
+        if (Auth::check()) {
+            $photo->is_liked = $photo->likers()->where('user_id', Auth::id())->exists();
+        } else {
+            $photo->is_liked = false;
+        }
+
+        return response()->json($photo);
     }
 
     public function update(Request $request, Photo $photo)
@@ -174,31 +194,31 @@ class BankFotoController extends Controller
         return back()->with('success', 'Detail foto berhasil diperbarui.');
     }
 
-    public function profile(Request $request)
-    {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
+    // public function profile(Request $request)
+    // {
+    //     /** @var \App\Models\User $user */
+    //     $user = Auth::user();
 
-        $photos = $user->photos()
-            ->with(['user', 'tags'])
-            // Selalu true karena ini foto milik user, tapi kita jaga untuk konsistensi
-            ->withExists(['likers as is_liked' => fn ($q) => $q->where('user_id', $user->id)])
-            ->latest()
-            ->paginate(12)
-            ->withQueryString();
+    //     $photos = $user->photos()
+    //         ->with(['user', 'tags'])
+    //         // Selalu true karena ini foto milik user, tapi kita jaga untuk konsistensi
+    //         ->withExists(['likers as is_liked' => fn ($q) => $q->where('user_id', $user->id)])
+    //         ->latest()
+    //         ->paginate(12)
+    //         ->withQueryString();
 
-        $stats = [
-            'totalPhotos' => $user->photos()->count(),
-            'totalLikes' => $user->photos()->sum('likes'),
-            'totalDownloads' => $user->photos()->sum('downloads'),
-            'totalViews' => $user->photos()->sum('views'),
-        ];
+    //     $stats = [
+    //         'totalPhotos' => $user->photos()->count(),
+    //         'totalLikes' => $user->photos()->sum('likes'),
+    //         'totalDownloads' => $user->photos()->sum('downloads'),
+    //         'totalViews' => $user->photos()->sum('views'),
+    //     ];
 
-        return Inertia::render('bank-foto/profile', [
-            'photos' => $photos,
-            'stats' => $stats,
-        ]);
-    }
+    //     return Inertia::render('bank-foto/profile', [
+    //         'photos' => $photos,
+    //         'stats' => $stats,
+    //     ]);
+    // }
 
     public function destroy(Photo $photo)
     {

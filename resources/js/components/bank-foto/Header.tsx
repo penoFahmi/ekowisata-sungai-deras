@@ -43,7 +43,7 @@ export function Header() {
     <header className="border-b border-white/10 bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/60 sticky top-0 z-50 shadow-sm">
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
-          <Link href={route('bank-foto')} className="flex items-center gap-3">
+          <Link href={route('bank-foto.index')} className="flex items-center gap-3">
               <img src="/logo-pmm.PNG" alt="Logo PMM" className="h-10 w-auto rounded-md" />
               <div>
                 <h1 className="font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">PhotoBank</h1>
@@ -89,7 +89,7 @@ export function Header() {
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuItem asChild>
-                      <Link href={route('bank-foto.profile')} className="cursor-pointer">
+                      <Link href={route('profile')} className="cursor-pointer">
                         <User className="mr-2 h-4 w-4" />
                         <span>Profil Saya</span>
                       </Link>
