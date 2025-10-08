@@ -1,14 +1,14 @@
 import { useMemo, useState, useEffect } from "react";
 import { usePage, Link, router } from "@inertiajs/react";
 import axios from 'axios';
-import { Header } from "@/components/bank-foto/Header";
 import { Footer } from "@/components/landing-page/footer";
 import { PhotoGallery } from "@/components/bank-foto/PhotoGallery";
 import { Pagination, PaginationContent, PaginationItem } from "@/components/ui/pagination";
 import { PageProps, PaginatedResponse } from "@/types";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera, Download, Eye, Heart } from "lucide-react";
+import { route } from "ziggy-js";
+import { ProfileHeader } from "@/components/bank-foto/ProfileHeader";
 import ModalPhotoDetail from "@/components/bank-foto/ModalPhotoDetail";
+import { ProfilePageHeader } from "@/components/bank-foto/ProfilePageHeader";
 import ModalEditPhoto from "@/components/bank-foto/ModalEditPhoto";
 import {
   AlertDialog,
@@ -78,13 +78,6 @@ export default function ProfilePage() {
     }));
   }, [photos.data]);
 
-  const statItems = [
-    { label: 'Total Foto', value: stats.totalPhotos, icon: Camera },
-    { label: 'Total Dilihat', value: stats.totalViews, icon: Eye },
-    { label: 'Total Disukai', value: stats.totalLikes, icon: Heart },
-    { label: 'Total Unduhan', value: stats.totalDownloads, icon: Download },
-  ];
-
   const handleEdit = (photoId: string) => {
     const photoToEdit = photos.data.find(p => p.id.toString() === photoId);
     if (photoToEdit) {
@@ -140,7 +133,12 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50">
-      <ModalEditPhoto isOpen={!!editingPhoto} onClose={() => setEditingPhoto(null)} onSuccess={() => {}} photo={editingPhoto} />
+      <ModalEditPhoto
+        isOpen={!!editingPhoto}
+        onClose={() => setEditingPhoto(null)}
+        onSuccess={() => router.reload({ only: ['photos'] })}
+        photo={editingPhoto}
+      />
       <ModalPhotoDetail
           isOpen={isDetailModalOpen}
           onClose={closeDetailModal}
@@ -165,30 +163,10 @@ export default function ProfilePage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <Header />
-      <main className="container mx-auto px-4 py-12">
-        {/* Profile Header */}
-        <div className="bg-white/50 backdrop-blur-sm rounded-2xl p-8 mb-12 flex flex-col md:flex-row items-center gap-8 shadow-lg">
-          <Avatar className="h-24 w-24 md:h-32 md:w-32 border-4 border-white shadow-md">
-            <AvatarImage src={`https://ui-avatars.com/api/?name=${user.name}&background=random&size=128`} alt={user.name} />
-            <AvatarFallback>{user.name.substring(0, 2)}</AvatarFallback>
-          </Avatar>
-          <div className="text-center md:text-left">
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-800">{user.name}</h1>
-            <p className="text-gray-500">{user.email}</p>
-          </div>
-        </div>
+      <ProfilePageHeader />
 
-        {/* Stats Bar */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-          {statItems.map((item, index) => (
-            <div key={index} className="bg-white/60 backdrop-blur-sm rounded-xl p-4 text-center shadow-md">
-              <item.icon className="h-8 w-8 mx-auto mb-2 text-purple-600" />
-              <p className="text-2xl font-bold text-gray-800">{item.value.toLocaleString('id-ID')}</p>
-              <p className="text-sm text-gray-500">{item.label}</p>
-            </div>
-          ))}
-        </div>
+      <main className="container mx-auto px-4 py-12">
+        <ProfileHeader user={user} stats={stats} />
 
         {/* Photo Gallery */}
         <div className="space-y-8">
@@ -213,7 +191,7 @@ export default function ProfilePage() {
                         href={link.url || '#'}
                         className={`px-4 py-2 border rounded-md ${link.active ? 'bg-purple-600 text-white border-purple-600' : 'bg-white'}`}
                         dangerouslySetInnerHTML={{ __html: link.label }}
-                        preserve-scroll
+                        preserveScroll
                       />
                     </PaginationItem>
                   ))}
