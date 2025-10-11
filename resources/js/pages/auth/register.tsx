@@ -8,13 +8,13 @@ import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import AuthLayout from '@/layouts/auth-layout';
+import AuthSplitLayout from '@/layouts/auth/auth-split-layout';
 
 export default function Register() {
     return (
-        <AuthLayout
-            title="Create an account"
-            description="Enter your details below to create your account"
+        <AuthSplitLayout
+            title="Silahkan buat akun"
+            description="Masukkan detail Anda di bawah ini untuk membuat akun Anda"
         >
             <Head title="Register" />
             <Form
@@ -112,6 +112,6 @@ export default function Register() {
                     </>
                 )}
             </Form>
-        </AuthLayout>
+        </AuthSplitLayout>
     );
 }
