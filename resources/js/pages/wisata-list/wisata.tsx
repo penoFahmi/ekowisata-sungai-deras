@@ -47,24 +47,15 @@ export default function WisataIndex() {
         <div className="min-h-screen bg-background">
             <Head title="Semua Wisata" />
             <Navigation />
-            <HeroSectionSecond />
-            <main className="pt-24 pb-12">
-                <section id="semua-wisata" className="py-10 bg-muted/30">
+            <HeroSectionSecond
+                title="Semua Destinasi Wisata"
+                description="Temukan dan jelajahi setiap sudut keindahan yang ditawarkan oleh Desa Sungai Deras."
+            />
+            <main>
+                <section id="semua-wisata" className="py-20 md:py-28 bg-muted/30">
                     <div className="container mx-auto px-4">
-                        <div className="text-center mb-16">
-                            <div className="flex justify-center items-center gap-2 mb-4">
-                                <Mountain className="w-8 h-8 text-primary" />
-                                <h1 className="text-4xl md:text-5xl font-bold">
-                                    Semua Destinasi Wisata
-                                </h1>
-                            </div>
-                            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                                Temukan dan jelajahi setiap sudut keindahan yang ditawarkan oleh Desa Sungai Deras.
-                            </p>
-                        </div>
-
                         {/* Search Input */}
-                        <div className="mb-12 max-w-lg mx-auto">
+                        <div className="mb-16 max-w-lg mx-auto">
                             <div className="relative">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                                 <Input

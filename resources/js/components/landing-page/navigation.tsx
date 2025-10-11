@@ -27,17 +27,17 @@ export function Navigation() {
         icon: Home
     },
     {
-        href: "#map",
-        label: "Peta Wisata",
+        href: "/wisata-list",
+        label: "Wisata",
         icon: MapPin
     },
     {
-        href: "#umkm",
+        href: "/umkm-list",
         label: "UMKM",
         icon: Store
     },
     {
-        href: "#events",
+        href: "/agenda-list",
         label: "Agenda",
         icon: Calendar
     },
@@ -112,9 +112,13 @@ export function Navigation() {
             <button
               key={item.href}
               onClick={() => handleNavClick(item.href)}
-              className={`font-medium transition-colors ${
-                activeSection === item.href ? 'text-primary' : isScrolled ? 'text-gray-700 hover:text-primary' : 'text-white hover:text-white/80'
-              }`}
+              className={`relative font-medium transition-colors duration-300 py-2 border-b-2
+                ${activeSection === item.href
+                  ? (isScrolled ? 'border-primary text-primary' : 'border-white text-white')
+                  : (isScrolled
+                    ? 'border-transparent text-gray-700 hover:text-primary'
+                    : 'border-transparent text-white hover:text-white/80')
+                }`}
             >
               {item.label}
             </button>
@@ -174,7 +178,7 @@ export function Navigation() {
                     <button
                       key={item.href}
                       onClick={() => handleNavClick(item.href)}
-                      className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-colors text-left ${activeSection === item.href ? 'bg-primary/10 text-primary' : 'hover:bg-gray-100'}`}
+                      className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-colors text-left ${activeSection === item.href ? 'bg-primary text-primary-foreground shadow-sm' : 'hover:bg-gray-100'}`}
                     >
                       <Icon className="h-5 w-5 text-primary" />
                       <span className="font-medium">{item.label}</span>

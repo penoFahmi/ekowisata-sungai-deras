@@ -25,7 +25,7 @@ export function HeroSection() {
         <div className="space-y-6">
           <h1 className="text-4xl md:text-6xl font-extrabold leading-tight tracking-tight">
             <span className="block text-lg md:text-xl font-medium text-gray-300 tracking-wider mb-2">Selamat Datang di</span>
-            <span className="block text-primary-foreground bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-indigo-500">Website Ekowisata Desa Sungai Deras</span>
+            <span className="block text-primary-foreground bg-clip-text text-transparent bg-gradient-to-r from-amber-400 via-orange-500 to-red-600">Website Ekowisata Desa Sungai Deras</span>
           </h1>
           <p className="text-lg md:text-xl text-gray-200 max-w-2xl mx-auto">
             Jelajahi keindahan alam, budaya lokal, dan produk UMKM terbaik
@@ -34,7 +34,7 @@ export function HeroSection() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
             <Button
               size="lg"
-              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              className="bg-orange-500 hover:bg-orange-600 text-white"
               onClick={() => handleScrollTo('#map')}
             >
               <MapPin className="w-5 h-5 mr-2" />

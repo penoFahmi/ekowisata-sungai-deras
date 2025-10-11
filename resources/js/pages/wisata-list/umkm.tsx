@@ -50,25 +50,18 @@ export default function UmkmIndex() {
         <div className="bg-background text-foreground">
             <Head title="Direktori UMKM" />
             <Navigation />
-            <HeroSectionSecond />
+            <HeroSectionSecond
+                title="Direktori UMKM"
+                description="Dukung ekonomi lokal dengan menemukan produk dan jasa terbaik dari Desa Sungai Deras."
+            />
             <main>
                 <section className="py-20 md:py-28">
                     <div className="container mx-auto px-4">
-                        <div className="text-center mb-16">
-                            <div className="flex justify-center items-center gap-2 mb-4">
-                                <Store className="w-8 h-8 text-primary" />
-                                <h1 className="text-4xl md:text-5xl font-bold">Direktori UMKM</h1>
-                            </div>
-                            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                                Dukung ekonomi lokal dengan menemukan produk dan jasa terbaik dari Desa Sungai Deras.
-                            </p>
-                        </div>
-
                         <div className="grid gap-12 max-w-7xl mx-auto">
 
                             {/* Results Section */}
                             <div className="lg:col-span-3">
-                                <div className="mb-8">
+                                <div className="mb-12">
                                     <div className="relative">
                                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                                         <Input type="search" placeholder="Cari nama UMKM atau produk..." className="pl-10 h-12 text-base" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />

@@ -59,20 +59,13 @@ export default function AgendaIndex() {
         <div className="bg-background text-foreground">
             <Head title="Semua Agenda" />
             <Navigation />
-            <HeroSectionSecond />
+            <HeroSectionSecond
+                title="Agenda & Acara"
+                description="Ikuti terus berbagai acara dan kegiatan menarik yang diselenggarakan di Desa Sungai Deras."
+            />
             <main>
                 <section className="py-20 md:py-28">
                     <div className="container mx-auto px-4">
-                        <div className="text-center mb-16">
-                            <div className="flex justify-center items-center gap-2 mb-4">
-                                <Calendar className="w-8 h-8 text-primary" />
-                                <h1 className="text-4xl md:text-5xl font-bold">Agenda & Acara</h1>
-                            </div>
-                            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                                Ikuti terus berbagai acara dan kegiatan menarik yang diselenggarakan di Desa Sungai Deras.
-                            </p>
-                        </div>
-
                         <div className="max-w-7xl mx-auto">
                             <div className="mb-8 max-w-lg mx-auto">
                                 <div className="relative">

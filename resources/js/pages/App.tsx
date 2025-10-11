@@ -21,7 +21,7 @@ export default function App() {
   const { tourismSpots, umkms, agendas } = usePage<AppProps>().props;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-b from-white to-slate-100 dark:from-slate-900 dark:to-slate-950">
       <Navigation />
       <main>
         <HeroSection />
@@ -29,7 +29,7 @@ export default function App() {
         <InteractiveMap tourismSpots={tourismSpots} umkms={umkms} />
         <UMKMSection umkms={umkms} />
         <EventsSection agendas={agendas} />
-        <TestimonialSection />
+        {/* <TestimonialSection /> */}
       </main>
       <Footer />
     </div>
