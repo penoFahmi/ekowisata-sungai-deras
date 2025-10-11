@@ -12,11 +12,10 @@ export function Footer() {
   ];
 
   const attractions = [
-    "Air Terjun Sungai Deras",
+    "Air Terjun Mini",
     "Bukit Bendera",
-    "Sentra Kerajinan Bambu",
-    "Pasar Kuliner Tradisional",
-    "Homestay Sari Asih"
+    "Wisata Alam Indah Lestari",
+    "Saung Nila"
   ];
 
   const handleLinkClick = (href: string) => {
@@ -117,9 +116,14 @@ export function Footer() {
         <Separator className="my-8 bg-secondary-foreground/20" />
 
         <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-          <p className="text-sm text-secondary-foreground/60">
-            © 2025 Desa Wisata Sungai Deras. Semua hak cipta dilindungi.
-          </p>
+        <div className="text-center md:text-left">
+            <p className="text-sm text-secondary-foreground/60">
+              © 2025 Desa Wisata Sungai Deras. Semua hak cipta dilindungi.
+            </p>
+            <p className="text-sm text-secondary-foreground/60 mt-1">
+              Dikembangkan oleh Tim PMM Universitas Muhammadiyah Pontianak.
+            </p>
+          </div>
           <div className="flex space-x-6 text-sm">
             <button className="text-secondary-foreground/60 hover:text-secondary-foreground transition-colors">
               Kebijakan Privasi

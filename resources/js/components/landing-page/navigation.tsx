@@ -22,7 +22,7 @@ export function Navigation() {
 
   const navItems = [
     {
-        href: "#home",
+        href: "/",
         label: "Beranda",
         icon: Home
     },
