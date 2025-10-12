@@ -17,18 +17,15 @@ export function FeaturedAttractions({ tourismSpots, onSelectSpot }: FeaturedAttr
     };
 
     return (
-        // Menggunakan warna latar dasar dari palet baru
         <section id="wisata-unggulan" className="py-24 bg-stone-100 dark:bg-slate-900">
             <div className="container mx-auto px-4">
                 <div className="text-center mb-16">
-                    {/* Menggunakan aksen 'Biru Mata Air' dan warna utama 'Hijau Hutan Lindung' */}
                     <div className="inline-flex justify-center items-center gap-3 mb-4 bg-sky-100 text-teal-900 px-4 py-2 rounded-full dark:bg-sky-900/40 dark:text-sky-200">
                         <Mountain className="w-6 h-6" />
                         <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
                             Wisata Unggulan
                         </h2>
                     </div>
-                    {/* Menggunakan warna teks sekunder yang lebih hangat */}
                     <p className="text-lg text-stone-600 dark:text-stone-400 max-w-3xl mx-auto">
                         Jelajahi keindahan alam dan budaya Desa Sungai Deras yang mempesona melalui destinasi pilihan kami.
                     </p>
@@ -38,7 +35,6 @@ export function FeaturedAttractions({ tourismSpots, onSelectSpot }: FeaturedAttr
                     {tourismSpots.map((spot) => (
                         <Card
                             key={spot.id}
-                            // Card dibuat 'putih' agar menonjol, dengan border hover 'Oranye Senja'
                             className="group bg-white dark:bg-slate-800 border border-stone-200 dark:border-slate-700 hover:border-amber-500/40 rounded-xl overflow-hidden flex flex-col transition-all duration-300 ease-in-out hover:shadow-2xl hover:-translate-y-2"
                         >
                             <CardHeader className="p-0">
@@ -49,7 +45,6 @@ export function FeaturedAttractions({ tourismSpots, onSelectSpot }: FeaturedAttr
                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                                    {/* Badge kategori menggunakan 'Biru Mata Air' */}
                                     <Badge className="absolute top-4 left-4 text-sm bg-sky-100 text-sky-800 border border-sky-200/80 dark:bg-sky-900/50 dark:text-sky-300 dark:border-sky-800">
                                         {spot.category.name}
                                     </Badge>
@@ -66,7 +61,6 @@ export function FeaturedAttractions({ tourismSpots, onSelectSpot }: FeaturedAttr
                                 </p>
                             </CardContent>
                             <CardFooter className="p-6 pt-0 mt-auto">
-                                {/* Tombol CTA tetap menggunakan 'Oranye Lembayung Senja' */}
                                 <Button onClick={() => onSelectSpot(spot)} className="w-full font-semibold bg-amber-600 hover:bg-amber-700 text-white dark:bg-amber-500 dark:hover:bg-amber-600">
                                     <Eye className="w-4 h-4 mr-2" />
                                     Lihat Detail

@@ -6,27 +6,30 @@ import { MapPin, Mountain, Store, X, List, Search } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup, GeoJSON, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import { motion, AnimatePresence } from 'framer-motion';
 
-// --- Type Definitions ---
 type PointOfInterest = (TourismSpot | Umkm) & { type: 'wisata' | 'umkm' };
 
-// --- Leaflet Icon Fix & Custom Icons (WARNA BARU) ---
-const createLeafletIcon = (iconUrl: string) => new L.Icon({
+interface InteractiveMapProps {
+    tourismSpots: TourismSpot[];
+    umkms: Umkm[];
+}
+
+const createLeafletIcon = (iconUrl: string, size: [number, number] = [25, 41]) => new L.Icon({
     iconUrl,
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
+    iconSize: size,
+    iconAnchor: [size[0] / 2, size[1]],
     popupAnchor: [1, -34],
     shadowSize: [41, 41]
 });
 
-// Menggunakan warna Teal untuk Wisata dan Orange untuk UMKM
 const wisataIcon = createLeafletIcon('https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-teal.png');
 const umkmIcon = createLeafletIcon('https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png');
 const activeIcon = createLeafletIcon('https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png');
+const wisataIconHover = createLeafletIcon('https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-teal.png', [30, 49]);
+const umkmIconHover = createLeafletIcon('https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png', [30, 49]);
 
-
-// --- Helper Component to Set Map Bounds ---
 const MapBoundsSetter = ({ geoJsonData }: { geoJsonData: any }) => {
     const map = useMap();
     useEffect(() => {
@@ -40,18 +43,22 @@ const MapBoundsSetter = ({ geoJsonData }: { geoJsonData: any }) => {
     return null;
 };
 
-// --- Main Component ---
-interface InteractiveMapProps {
-    tourismSpots: TourismSpot[];
-    umkms: Umkm[];
-}
-
 export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
     const [selectedCategory, setSelectedCategory] = useState("all");
     const [geoJsonData, setGeoJsonData] = useState<any>(null);
     const [activePoi, setActivePoi] = useState<PointOfInterest | null>(null);
+    const [hoveredPoiId, setHoveredPoiId] = useState<number | null>(null);
     const [isListVisible, setIsListVisible] = useState(false);
     const mapRef = useRef<L.Map | null>(null);
+
+    useEffect(() => {
+        if (isListVisible) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'auto';
+        }
+        return () => { document.body.style.overflow = 'auto'; };
+    }, [isListVisible]);
 
     useEffect(() => {
         fetch('/maps/peta.geojson')
@@ -71,18 +78,18 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
         return pointsOfInterest.filter(poi => poi.type === selectedCategory);
     }, [selectedCategory, pointsOfInterest]);
 
-    // --- Styling and Event Handlers for GeoJSON (WARNA BARU) ---
-    const dusunColors = ['#A7D7C5', '#F7D4A8', '#C2DED1', '#FBE6C6', '#87C4B1', '#EFCB9A']; // Nuansa Teal & Amber
+    const dusunColors: { [key: string]: string } = {
+        "Dusun Riam Cermin": "#A7D7C5",
+        "Dusun Setioso": "#F7D4A8",
+        "Dusun Sungai Deras": "#C2DED1",
+        "Dusun Sempurna": "#FBE6C6",
+        "DEFAULT": "#E0E0E0"
+    };
 
     const getDusunStyle = (feature: any) => {
-        const colorIndex = feature.properties.id % dusunColors.length;
-        return {
-            fillColor: dusunColors[colorIndex],
-            color: "#5D6D7E",
-            weight: 1.5,
-            opacity: 0.8,
-            fillOpacity: 0.5
-        };
+        const dusunName = feature?.properties?.Keterangan;
+        const fillColor = dusunColors[dusunName] || dusunColors["DEFAULT"];
+        return { fillColor, color: "#5D6D7E", weight: 1.5, opacity: 0.8, fillOpacity: 0.6 };
     };
 
     const onEachDusun = (feature: any, layer: L.Layer) => {
@@ -92,20 +99,18 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
                 mouseover: (e) => {
                     const l = e.target;
                     l.setStyle({ weight: 3, color: '#c0392b', fillOpacity: 0.7 });
-                    l.openPopup();
                 },
                 mouseout: (e) => {
-                    const l = e.target;
-                    (e.target.feature as any).resetStyle(l); // Cara reset style yang lebih baik
-                    l.closePopup();
+                    const geoJsonLayer = e.target;
+                    geoJsonLayer.setStyle(getDusunStyle(feature));
                 }
             });
         }
     };
 
-    // --- Interactivity Handlers ---
     const handlePoiClick = (poi: PointOfInterest) => {
         setActivePoi(poi);
+        setHoveredPoiId(null);
         if (mapRef.current && poi.latitude && poi.longitude) {
             mapRef.current.flyTo([parseFloat(poi.latitude), parseFloat(poi.longitude)], 16, {
                 animate: true,
@@ -116,6 +121,8 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
             setIsListVisible(false);
         }
     };
+
+    const handlePoiHover = (id: number | null) => setHoveredPoiId(id);
 
     const getImageUrl = (galleries: any[] | undefined) => {
         const path = galleries?.[0]?.path;
@@ -136,7 +143,13 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
                     </p>
                 </div>
 
-                <div className="relative h-[calc(100vh-250px)] md:h-[650px] w-full lg:grid lg:grid-cols-12 lg:gap-6 rounded-lg md:shadow-xl overflow-hidden border border-stone-200 dark:border-slate-700">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.8 }}
+                    className="relative h-[calc(100vh-200px)] md:h-[650px] w-full lg:grid lg:grid-cols-12 lg:gap-6 rounded-lg md:shadow-xl overflow-hidden border border-stone-200 dark:border-slate-700"
+                >
                     <aside className="hidden lg:block lg:col-span-4 h-full overflow-y-auto bg-white dark:bg-slate-800 p-1">
                         <PoiList
                             pois={filteredPOIs}
@@ -145,6 +158,7 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
                             selectedCategory={selectedCategory}
                             onCategoryChange={setSelectedCategory}
                             getImageUrl={getImageUrl}
+                            onPoiHover={handlePoiHover}
                         />
                     </aside>
 
@@ -166,15 +180,25 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
 
                             {filteredPOIs.map((poi) => {
                                 if (!poi.latitude || !poi.longitude) return null;
+                                const isHovered = hoveredPoiId === poi.id;
+                                const isActive = activePoi?.id === poi.id;
+
+                                const getIcon = () => {
+                                    if (isActive) return activeIcon;
+                                    if (isHovered) return poi.type === 'wisata' ? wisataIconHover : umkmIconHover;
+                                    return poi.type === 'wisata' ? wisataIcon : umkmIcon;
+                                };
+
                                 return (
                                     <Marker
                                         key={`${poi.type}-${poi.id}`}
                                         position={[parseFloat(poi.latitude), parseFloat(poi.longitude)]}
-                                        icon={activePoi?.id === poi.id ? activeIcon : (poi.type === 'wisata' ? wisataIcon : umkmIcon)}
-                                        eventHandlers={{ click: () => setActivePoi(poi) }}
+                                        icon={getIcon()}
+                                        eventHandlers={{ click: () => handlePoiClick(poi) }}
+                                        className={isActive ? 'pulsing-marker' : ''}
                                     >
                                         <Popup>
-                                            <div className="w-48">
+                                            <div className="w-40 sm:w-48">
                                                 <img src={getImageUrl(poi.galleries)} alt={poi.name} className="w-full h-24 object-cover rounded-md mb-2" />
                                                 <h4 className="font-bold text-md text-gray-800">{poi.name}</h4>
                                                 <Badge variant="secondary" className="mt-1">{poi.category.name}</Badge>
@@ -187,42 +211,72 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
                     </div>
 
                     <div className="lg:hidden">
+                        <AnimatePresence>
+                            {isListVisible && (
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    onClick={() => setIsListVisible(false)}
+                                    className="absolute inset-0 bg-black/40 backdrop-blur-sm z-10"
+                                />
+                            )}
+                        </AnimatePresence>
+
                         <Button
                             onClick={() => setIsListVisible(!isListVisible)}
-                            className="absolute bottom-4 right-4 z-10 rounded-full h-14 w-14 shadow-lg bg-amber-600 hover:bg-amber-700"
+                            className="absolute bottom-4 right-4 z-20 rounded-full h-14 w-14 shadow-lg bg-amber-600 hover:bg-amber-700 text-white"
                             aria-label="Tampilkan Daftar"
                         >
-                            {isListVisible ? <X className="h-6 w-6" /> : <List className="h-6 w-6" />}
+                            <AnimatePresence initial={false}>
+                                <motion.div
+                                    key={isListVisible ? "close" : "list"}
+                                    initial={{ rotate: -45, opacity: 0, scale: 0.5 }}
+                                    animate={{ rotate: 0, opacity: 1, scale: 1 }}
+                                    exit={{ rotate: 45, opacity: 0, scale: 0.5 }}
+                                    transition={{ duration: 0.2 }}
+                                >
+                                    {isListVisible ? <X className="h-6 w-6" /> : <List className="h-6 w-6" />}
+                                </motion.div>
+                            </AnimatePresence>
                         </Button>
 
-                        <div className={`absolute bottom-0 left-0 right-0 z-10 bg-white dark:bg-slate-800 rounded-t-2xl shadow-2xl transition-transform duration-500 ease-in-out ${isListVisible ? 'translate-y-0' : 'translate-y-full'}`}
-                             style={{ height: '70vh' }}
-                        >
-                             <div className="p-4 border-b border-stone-200 dark:border-slate-700">
-                                 <div className="w-12 h-1.5 bg-stone-300 dark:bg-slate-600 rounded-full mx-auto"></div>
-                                 <h3 className="text-center font-semibold text-lg mt-2 text-gray-800 dark:text-slate-200">Jelajahi Desa</h3>
-                             </div>
-                            <div className="h-[calc(100%-70px)] overflow-y-auto p-1">
-                                <PoiList
-                                    pois={filteredPOIs}
-                                    activePoi={activePoi}
-                                    onPoiClick={handlePoiClick}
-                                    selectedCategory={selectedCategory}
-                                    onCategoryChange={setSelectedCategory}
-                                    getImageUrl={getImageUrl}
-                                />
-                            </div>
-                        </div>
+                        <AnimatePresence>
+                            {isListVisible && (
+                                <motion.div
+                                    initial={{ y: "100%" }}
+                                    animate={{ y: "0%" }}
+                                    exit={{ y: "100%" }}
+                                    transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                                    className="absolute bottom-0 left-0 right-0 z-20 bg-white dark:bg-slate-800 rounded-t-2xl shadow-2xl"
+                                    style={{ height: '70vh' }}
+                                >
+                                    <div className="p-4 border-b border-stone-200 dark:border-slate-700">
+                                        <div className="w-12 h-1.5 bg-stone-300 dark:bg-slate-600 rounded-full mx-auto"></div>
+                                        <h3 className="text-center font-semibold text-lg mt-2 text-gray-800 dark:text-slate-200">Jelajahi Desa</h3>
+                                    </div>
+                                    <div className="h-[calc(100%-70px)] overflow-y-auto p-1">
+                                        <PoiList
+                                            pois={filteredPOIs}
+                                            activePoi={activePoi}
+                                            onPoiClick={handlePoiClick}
+                                            selectedCategory={selectedCategory}
+                                            onCategoryChange={setSelectedCategory}
+                                            getImageUrl={getImageUrl}
+                                            onPoiHover={handlePoiHover}
+                                        />
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
-                </div>
+                </motion.div>
             </div>
         </section>
     );
 }
 
-
-// --- Sub-component for rendering the POI list (reused for mobile/desktop) ---
-const PoiList = ({ pois, activePoi, onPoiClick, selectedCategory, onCategoryChange, getImageUrl }: any) => {
+const PoiList = ({ pois, activePoi, onPoiClick, selectedCategory, onCategoryChange, getImageUrl, onPoiHover }: any) => {
     const categories = [
         { id: "all", name: "Semua", icon: MapPin },
         { id: "wisata", name: "Wisata", icon: Mountain },
@@ -240,7 +294,7 @@ const PoiList = ({ pois, activePoi, onPoiClick, selectedCategory, onCategoryChan
                             variant={selectedCategory === cat.id ? "default" : "outline"}
                             size="sm"
                             onClick={() => onCategoryChange(cat.id)}
-                            className={`flex-1 transition-all duration-300 ${selectedCategory === cat.id ? 'bg-amber-600 hover:bg-amber-700 text-white' : 'border-stone-300'}`}
+                            className={`flex-1 transition-all duration-300 ${selectedCategory === cat.id ? 'bg-amber-600 hover:bg-amber-700 text-white' : 'border-stone-300 dark:border-slate-600'}`}
                         >
                             <cat.icon className="w-4 h-4 mr-2" />
                             {cat.name}
@@ -254,6 +308,8 @@ const PoiList = ({ pois, activePoi, onPoiClick, selectedCategory, onCategoryChan
                     <div
                         key={`${poi.type}-${poi.id}`}
                         onClick={() => onPoiClick(poi)}
+                        onMouseEnter={() => onPoiHover(poi.id)}
+                        onMouseLeave={() => onPoiHover(null)}
                         className={`flex items-center p-3 rounded-lg cursor-pointer transition-all duration-300 ${activePoi?.id === poi.id ? 'bg-amber-100 dark:bg-amber-900/50 ring-2 ring-amber-500' : 'hover:bg-stone-100 dark:hover:bg-slate-700'}`}
                     >
                         <img src={getImageUrl(poi.galleries)} alt={poi.name} className="w-16 h-16 object-cover rounded-md mr-4 flex-shrink-0" />
@@ -274,4 +330,4 @@ const PoiList = ({ pois, activePoi, onPoiClick, selectedCategory, onCategoryChan
             </div>
         </div>
     );
-}
+};

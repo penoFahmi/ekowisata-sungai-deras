@@ -1,4 +1,4 @@
-import { MapPin, Phone, Mail, Facebook, Instagram, Youtube } from "lucide-react";
+import { MapPin, Mail, Facebook, Instagram, Youtube } from "lucide-react";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
 import { Link } from "@inertiajs/react";
@@ -18,11 +18,6 @@ export function Footer() {
     "Wisata Alam Indah Lestari",
     "Saung Nila"
   ];
-
-  const handleLinkClick = (href: string) => {
-    const element = document.querySelector(href);
-    element?.scrollIntoView({ behavior: 'smooth' });
-  };
 
   return (
     <footer className="bg-slate-900 text-slate-300">
@@ -68,12 +63,12 @@ export function Footer() {
             <ul className="space-y-2">
               {quickLinks.map((link) => (
                 <li key={link.name}>
-                  <button
-                    onClick={() => handleLinkClick(link.href)}
+                  <Link
+                    href={link.href}
                     className="text-slate-400 hover:text-amber-400 transition-colors"
                   >
                     {link.name}
-                  </button>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -105,13 +100,6 @@ export function Footer() {
                   <p>Provinsi Kalimantan Barat</p>
                 </div>
               </div>
-
-              {/* <div className="flex items-center space-x-3">
-                <Phone className="w-5 h-5 text-slate-500" />
-                <span className="text-sm text-slate-400">
-                  +62 812-3456-7890
-                </span>
-              </div> */}
 
               <div className="flex items-center space-x-3">
                 <Mail className="w-5 h-5 text-slate-500" />

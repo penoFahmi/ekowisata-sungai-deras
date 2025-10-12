@@ -10,6 +10,8 @@ import { EventsSection } from "../components/landing-page/events-section";
 import { Footer } from "../components/landing-page/footer";
 import { PageProps, TourismSpot, Umkm, Agenda } from "@/types";
 import { WisataDetailModal } from "../components/wisata/WisataDetailModal";
+import { UmkmDetailModal } from "@/components/umkm/UmkmDetailModal";
+import { AgendaDetailModal } from "@/components/agenda/AgendaDetailModal";
 
 interface AppProps extends PageProps {
     tourismSpots: TourismSpot[];
@@ -20,6 +22,8 @@ interface AppProps extends PageProps {
 export default function App() {
     const { tourismSpots, umkms, agendas } = usePage<AppProps>().props;
     const [selectedSpot, setSelectedSpot] = React.useState<TourismSpot | null>(null);
+    const [selectedUmkm, setSelectedUmkm] = React.useState<Umkm | null>(null);
+    const [selectedAgenda, setSelectedAgenda] = React.useState<Agenda | null>(null);
 
     return (
         <div className="min-h-screen bg-stone-100 dark:bg-slate-900">
@@ -28,8 +32,8 @@ export default function App() {
                 <HeroSection />
                 <FeaturedAttractions tourismSpots={tourismSpots} onSelectSpot={setSelectedSpot} />
                 <InteractiveMap tourismSpots={tourismSpots} umkms={umkms} />
-                <UMKMSection umkms={umkms} />
-                <EventsSection agendas={agendas} />
+                <UMKMSection umkms={umkms} onSelectUmkm={setSelectedUmkm} />
+                <EventsSection agendas={agendas} onSelectAgenda={setSelectedAgenda} />
             </main>
             <Footer />
 
@@ -38,6 +42,16 @@ export default function App() {
                 spot={selectedSpot}
                 isOpen={!!selectedSpot}
                 onClose={() => setSelectedSpot(null)}
+            />
+            <UmkmDetailModal
+                umkm={selectedUmkm}
+                isOpen={!!selectedUmkm}
+                onClose={() => setSelectedUmkm(null)}
+            />
+            <AgendaDetailModal
+                agenda={selectedAgenda}
+                isOpen={!!selectedAgenda}
+                onClose={() => setSelectedAgenda(null)}
             />
         </div>
     );

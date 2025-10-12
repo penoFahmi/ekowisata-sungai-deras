@@ -50,11 +50,8 @@ export function Navigation() {
 
   useEffect(() => {
     const handleScroll = () => {
-      // Handle background change
       setIsScrolled(window.scrollY > 10);
-
-      // Handle active section highlighting
-      const scrollPosition = window.scrollY + 100; // Offset to trigger a bit earlier
+      const scrollPosition = window.scrollY + 100;
       let currentSection = "";
 
       navItems.forEach(item => {
@@ -68,7 +65,6 @@ export function Navigation() {
         }
       });
 
-      // Fallback to home if at the very top
       if (window.scrollY < 100) {
         currentSection = "#home";
       }
@@ -106,7 +102,6 @@ export function Navigation() {
           }`}>Desa Sungai Deras</h1>
         </div>
 
-        {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-6">
           {navItems.map((item) => (
             <button
@@ -162,7 +157,6 @@ export function Navigation() {
           )}
         </div>
 
-        {/* Mobile Navigation */}
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon" className="md:hidden">

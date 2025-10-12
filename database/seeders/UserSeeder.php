@@ -18,14 +18,14 @@ class UserSeeder extends Seeder
         $adminRole = Role::where('name', 'administrator')->first();
         $wisataRole = Role::where('name', 'pengelola-wisata')->first();
         $umkmRole = Role::where('name', 'pengelola-umkm')->first();
-        $sigRole = Role::where('name', 'pengelola-bank-foto-digital')->first();
+        $bankFotoDigitalRole = Role::where('name', 'pengelola-bank-foto-digital')->first();
         $userRole = Role::where('name', 'user-terdaftar')->first();
 
         // 2. Buat user Administrator
         // firstOrCreate akan membuat user hanya jika email-nya belum ada
         if ($adminRole) {
             $adminUser = User::firstOrCreate(
-                ['email' => 'admin@sungaideras.com'],
+                ['email' => 'admin@gmail.com'],
                 [
                     'name' => 'Administrator',
                     'password' => Hash::make('password'),
@@ -39,7 +39,7 @@ class UserSeeder extends Seeder
         // 3. Buat user Pengelola Wisata
         if ($wisataRole) {
             $wisataUser = User::firstOrCreate(
-                ['email' => 'wisata@sungaideras.com'],
+                ['email' => 'wisata@gmail.com'],
                 [
                     'name' => 'Pengelola Wisata',
                     'password' => Hash::make('password'),
@@ -52,7 +52,7 @@ class UserSeeder extends Seeder
         // 4. Buat user Pengelola UMKM
         if ($umkmRole) {
             $umkmUser = User::firstOrCreate(
-                ['email' => 'umkm@sungaideras.com'],
+                ['email' => 'umkm@gmail.com'],
                 [
                     'name' => 'Pengelola UMKM',
                     'password' => Hash::make('password'),
@@ -63,16 +63,16 @@ class UserSeeder extends Seeder
         }
 
         // 5. Buat user Pengelola Bank Foto Digital
-        if ($sigRole) {
-            $sigUser = User::firstOrCreate(
-                ['email' => 'bankfotodigital@sungaideras.com'],
+        if ($bankFotoDigitalRole) {
+            $bankFotoDigitalUser = User::firstOrCreate(
+                ['email' => 'bankfotodigital@gmail.com'],
                 [
                     'name' => 'Pengelola Bank Foto Digital',
                     'password' => Hash::make('password'),
                     'email_verified_at' => now(),
                 ]
             );
-            $sigUser->roles()->sync($sigRole->id);
+            $bankFotoDigitalUser->roles()->sync($bankFotoDigitalRole->id);
         }
 
         // 6. Buat user terdaftar biasa
