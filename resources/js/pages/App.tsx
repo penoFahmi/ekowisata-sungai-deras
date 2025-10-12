@@ -22,7 +22,7 @@ export default function App() {
     const [selectedSpot, setSelectedSpot] = React.useState<TourismSpot | null>(null);
 
     return (
-        <div className="min-h-screen bg-emerald-50 dark:bg-gray-900"> 
+        <div className="min-h-screen bg-stone-100 dark:bg-slate-900">
             <Navigation />
             <main>
                 <HeroSection />

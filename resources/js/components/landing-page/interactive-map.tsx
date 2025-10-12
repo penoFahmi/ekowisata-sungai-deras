@@ -4,14 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Mountain, Store, X, List, Search } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup, GeoJSON, useMap } from 'react-leaflet';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
 // --- Type Definitions ---
 type PointOfInterest = (TourismSpot | Umkm) & { type: 'wisata' | 'umkm' };
 
-// --- Leaflet Icon Fix & Custom Icons ---
+// --- Leaflet Icon Fix & Custom Icons (WARNA BARU) ---
 const createLeafletIcon = (iconUrl: string) => new L.Icon({
     iconUrl,
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
@@ -21,8 +20,9 @@ const createLeafletIcon = (iconUrl: string) => new L.Icon({
     shadowSize: [41, 41]
 });
 
-const wisataIcon = createLeafletIcon('https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png');
-const umkmIcon = createLeafletIcon('https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png');
+// Menggunakan warna Teal untuk Wisata dan Orange untuk UMKM
+const wisataIcon = createLeafletIcon('https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-teal.png');
+const umkmIcon = createLeafletIcon('https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png');
 const activeIcon = createLeafletIcon('https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png');
 
 
@@ -50,10 +50,9 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
     const [selectedCategory, setSelectedCategory] = useState("all");
     const [geoJsonData, setGeoJsonData] = useState<any>(null);
     const [activePoi, setActivePoi] = useState<PointOfInterest | null>(null);
-    const [isListVisible, setIsListVisible] = useState(false); // For mobile bottom sheet
+    const [isListVisible, setIsListVisible] = useState(false);
     const mapRef = useRef<L.Map | null>(null);
 
-    // Fetch GeoJSON data for village boundaries
     useEffect(() => {
         fetch('/maps/peta.geojson')
             .then(res => res.json())
@@ -61,7 +60,6 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
             .catch(err => console.error("Gagal memuat batas dusun:", err));
     }, []);
 
-    // Memoize combined and sorted points of interest
     const pointsOfInterest = useMemo(() => {
         const spots = tourismSpots.map(spot => ({ ...spot, type: 'wisata' as const }));
         const umkmItems = umkms.map(umkm => ({ ...umkm, type: 'umkm' as const }));
@@ -73,11 +71,11 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
         return pointsOfInterest.filter(poi => poi.type === selectedCategory);
     }, [selectedCategory, pointsOfInterest]);
 
-    // --- Styling and Event Handlers for GeoJSON ---
-    const dusunColors = ['#a8d8ea', '#aa96da', '#fcbad3', '#ffffd2', '#a1eafb', '#e6c3a3', '#d7bde2'];
+    // --- Styling and Event Handlers for GeoJSON (WARNA BARU) ---
+    const dusunColors = ['#A7D7C5', '#F7D4A8', '#C2DED1', '#FBE6C6', '#87C4B1', '#EFCB9A']; // Nuansa Teal & Amber
 
     const getDusunStyle = (feature: any) => {
-        const colorIndex = feature.properties.id % dusunColors.length; // Use a property or index
+        const colorIndex = feature.properties.id % dusunColors.length;
         return {
             fillColor: dusunColors[colorIndex],
             color: "#5D6D7E",
@@ -89,7 +87,7 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
 
     const onEachDusun = (feature: any, layer: L.Layer) => {
         if (feature.properties && feature.properties.Keterangan) {
-            layer.bindPopup(feature.properties.Keterangan);
+            layer.bindPopup(`<b>${feature.properties.Keterangan}</b>`);
             layer.on({
                 mouseover: (e) => {
                     const l = e.target;
@@ -98,9 +96,7 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
                 },
                 mouseout: (e) => {
                     const l = e.target;
-                    // This is tricky because GeoJSON is a single layer. We reset it.
-                    // A better approach would be to have a reference to the GeoJSON layer and call `resetStyle`.
-                    l.setStyle(getDusunStyle(feature));
+                    (e.target.feature as any).resetStyle(l); // Cara reset style yang lebih baik
                     l.closePopup();
                 }
             });
@@ -116,7 +112,6 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
                 duration: 1.5
             });
         }
-        // On mobile, hide the list after clicking to show the map
         if (window.innerWidth < 1024) {
             setIsListVisible(false);
         }
@@ -127,25 +122,22 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
         return path ? `/storage/${path}` : 'https://placehold.co/300x200/e0e0e0/757575?text=Gambar';
     };
 
-    // Default map center, will be overridden by MapBoundsSetter
     const defaultCenter: [number, number] = [-0.260472, 109.241244];
 
     return (
-        <section id="map" className="py-20 bg-teal-50 dark:bg-gray-800">
+        <section id="map" className="py-24 bg-white dark:bg-slate-800">
             <div className="container mx-auto px-0 md:px-4">
-                <div className="text-center mb-8 md:mb-12 px-4">
-                    <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">
+                <div className="text-center mb-12 px-4">
+                    <h2 className="text-3xl md:text-4xl font-bold text-teal-900 dark:text-teal-200 mb-3">
                         Peta Interaktif Desa
                     </h2>
-                    <p className="text-md md:text-lg text-gray-600 max-w-3xl mx-auto">
+                    <p className="text-lg text-stone-600 dark:text-stone-400 max-w-3xl mx-auto">
                         Jelajahi setiap sudut Desa Sungai Deras, temukan lokasi wisata dan produk UMKM unggulan.
                     </p>
                 </div>
 
-                <div className="relative h-[calc(100vh-250px)] md:h-[650px] w-full lg:grid lg:grid-cols-12 lg:gap-6 rounded-lg md:shadow-xl overflow-hidden">
-
-                    {/* --- Sidebar for Desktop, hidden on mobile --- */}
-                    <aside className="hidden lg:block lg:col-span-4 h-full overflow-y-auto bg-white p-1">
+                <div className="relative h-[calc(100vh-250px)] md:h-[650px] w-full lg:grid lg:grid-cols-12 lg:gap-6 rounded-lg md:shadow-xl overflow-hidden border border-stone-200 dark:border-slate-700">
+                    <aside className="hidden lg:block lg:col-span-4 h-full overflow-y-auto bg-white dark:bg-slate-800 p-1">
                         <PoiList
                             pois={filteredPOIs}
                             activePoi={activePoi}
@@ -156,7 +148,6 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
                         />
                     </aside>
 
-                    {/* --- Map Area --- */}
                     <div className="lg:col-span-8 h-full w-full">
                         <MapContainer
                             center={defaultCenter}
@@ -180,14 +171,12 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
                                         key={`${poi.type}-${poi.id}`}
                                         position={[parseFloat(poi.latitude), parseFloat(poi.longitude)]}
                                         icon={activePoi?.id === poi.id ? activeIcon : (poi.type === 'wisata' ? wisataIcon : umkmIcon)}
-                                        eventHandlers={{
-                                            click: () => setActivePoi(poi),
-                                        }}
+                                        eventHandlers={{ click: () => setActivePoi(poi) }}
                                     >
                                         <Popup>
                                             <div className="w-48">
                                                 <img src={getImageUrl(poi.galleries)} alt={poi.name} className="w-full h-24 object-cover rounded-md mb-2" />
-                                                <h4 className="font-bold text-md">{poi.name}</h4>
+                                                <h4 className="font-bold text-md text-gray-800">{poi.name}</h4>
                                                 <Badge variant="secondary" className="mt-1">{poi.category.name}</Badge>
                                             </div>
                                         </Popup>
@@ -197,22 +186,21 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
                         </MapContainer>
                     </div>
 
-                    {/* --- Mobile Bottom Sheet & Toggle Button --- */}
                     <div className="lg:hidden">
                         <Button
                             onClick={() => setIsListVisible(!isListVisible)}
-                            className="absolute bottom-4 right-4 z-10 rounded-full h-14 w-14 shadow-lg"
+                            className="absolute bottom-4 right-4 z-10 rounded-full h-14 w-14 shadow-lg bg-amber-600 hover:bg-amber-700"
                             aria-label="Tampilkan Daftar"
                         >
                             {isListVisible ? <X className="h-6 w-6" /> : <List className="h-6 w-6" />}
                         </Button>
 
-                        <div className={`absolute bottom-0 left-0 right-0 z-10 bg-white rounded-t-2xl shadow-2xl transition-transform duration-500 ease-in-out ${isListVisible ? 'translate-y-0' : 'translate-y-full'}`}
+                        <div className={`absolute bottom-0 left-0 right-0 z-10 bg-white dark:bg-slate-800 rounded-t-2xl shadow-2xl transition-transform duration-500 ease-in-out ${isListVisible ? 'translate-y-0' : 'translate-y-full'}`}
                              style={{ height: '70vh' }}
                         >
-                             <div className="p-4 border-b border-gray-200">
-                                <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto"></div>
-                                <h3 className="text-center font-semibold text-lg mt-2">Jelajahi Desa</h3>
+                             <div className="p-4 border-b border-stone-200 dark:border-slate-700">
+                                 <div className="w-12 h-1.5 bg-stone-300 dark:bg-slate-600 rounded-full mx-auto"></div>
+                                 <h3 className="text-center font-semibold text-lg mt-2 text-gray-800 dark:text-slate-200">Jelajahi Desa</h3>
                              </div>
                             <div className="h-[calc(100%-70px)] overflow-y-auto p-1">
                                 <PoiList
@@ -226,7 +214,6 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
         </section>
@@ -244,8 +231,8 @@ const PoiList = ({ pois, activePoi, onPoiClick, selectedCategory, onCategoryChan
 
     return (
         <div>
-            <div className="p-4 sticky top-0 bg-white/80 backdrop-blur-sm z-10">
-                <h3 className="text-xl font-bold mb-3">Kategori Lokasi</h3>
+            <div className="p-4 sticky top-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm z-10">
+                <h3 className="text-xl font-bold mb-3 text-teal-900 dark:text-teal-200">Kategori Lokasi</h3>
                 <div className="flex space-x-2">
                     {categories.map(cat => (
                         <Button
@@ -253,7 +240,7 @@ const PoiList = ({ pois, activePoi, onPoiClick, selectedCategory, onCategoryChan
                             variant={selectedCategory === cat.id ? "default" : "outline"}
                             size="sm"
                             onClick={() => onCategoryChange(cat.id)}
-                            className="flex-1 transition-all duration-300"
+                            className={`flex-1 transition-all duration-300 ${selectedCategory === cat.id ? 'bg-amber-600 hover:bg-amber-700 text-white' : 'border-stone-300'}`}
                         >
                             <cat.icon className="w-4 h-4 mr-2" />
                             {cat.name}
@@ -267,21 +254,21 @@ const PoiList = ({ pois, activePoi, onPoiClick, selectedCategory, onCategoryChan
                     <div
                         key={`${poi.type}-${poi.id}`}
                         onClick={() => onPoiClick(poi)}
-                        className={`flex items-center p-3 rounded-lg cursor-pointer transition-all duration-300 ${activePoi?.id === poi.id ? 'bg-primary/10 ring-2 ring-primary' : 'hover:bg-gray-100'}`}
+                        className={`flex items-center p-3 rounded-lg cursor-pointer transition-all duration-300 ${activePoi?.id === poi.id ? 'bg-amber-100 dark:bg-amber-900/50 ring-2 ring-amber-500' : 'hover:bg-stone-100 dark:hover:bg-slate-700'}`}
                     >
                         <img src={getImageUrl(poi.galleries)} alt={poi.name} className="w-16 h-16 object-cover rounded-md mr-4 flex-shrink-0" />
-                        <div className="flex-grow">
-                            <p className="font-semibold text-gray-800 line-clamp-1">{poi.name}</p>
-                            <p className="text-sm text-gray-500 line-clamp-1">{poi.category.name}</p>
+                        <div className="flex-grow overflow-hidden">
+                            <p className="font-semibold text-gray-800 dark:text-slate-200 truncate">{poi.name}</p>
+                            <p className="text-sm text-stone-500 dark:text-stone-400 truncate">{poi.category.name}</p>
                         </div>
-                        <Badge variant={poi.type === 'wisata' ? 'default' : 'secondary'} className={`capitalize text-xs ${poi.type === 'wisata' ? 'bg-green-600' : 'bg-purple-600'}`}>
+                        <Badge variant={'secondary'} className={`capitalize text-xs ml-2 flex-shrink-0 text-white ${poi.type === 'wisata' ? 'bg-teal-600' : 'bg-amber-600'}`}>
                             {poi.type}
                         </Badge>
                     </div>
                 )) : (
                     <div className="text-center py-10 px-4">
-                        <Search className="mx-auto h-10 w-10 text-gray-400" />
-                        <p className="mt-2 text-gray-600">Tidak ada lokasi ditemukan untuk kategori ini.</p>
+                        <Search className="mx-auto h-10 w-10 text-stone-400" />
+                        <p className="mt-2 text-stone-600 dark:text-stone-400">Tidak ada lokasi ditemukan untuk kategori ini.</p>
                     </div>
                 )}
             </div>
