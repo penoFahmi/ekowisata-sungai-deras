@@ -1,44 +1,19 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { TourismSpot, Umkm } from "@/types";
-import { Button } from "../ui/button";
-import { Badge } from "../ui/badge";
-import {
-  MapPin,
-  Mountain,
-  UtensilsCrossed,
-  Home,
-  Store,
-  Filter,
-} from "lucide-react";
-
-// Import komponen dari react-leaflet
-import { MapContainer, TileLayer, Marker, Popup, GeoJSON } from 'react-leaflet';
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { MapPin, Mountain, Store, X, List, Search } from "lucide-react";
+import { MapContainer, TileLayer, Marker, Popup, GeoJSON, useMap } from 'react-leaflet';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
-// Fix untuk ikon default Leaflet yang rusak di React
-import icon from 'leaflet/dist/images/marker-icon.png';
-import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+// --- Type Definitions ---
+type PointOfInterest = (TourismSpot | Umkm) & { type: 'wisata' | 'umkm' };
 
-let DefaultIcon = L.icon({
-    iconUrl: icon,
-    shadowUrl: iconShadow,
-    iconAnchor: [12, 41], // point of the icon which will correspond to marker's location
-    popupAnchor: [1, -34], // point from which the popup should open relative to the iconAnchor
-});
-
-L.Marker.prototype.options.icon = DefaultIcon;
-
-const categories = [
-  { id: "all", name: "Semua", icon: MapPin, color: "bg-gray-500" },
-  { id: "wisata", name: "Wisata", icon: Mountain, color: "bg-green-500" },
-  { id: "umkm", name: "UMKM", icon: Store, color: "bg-purple-500" },
-];
-
-// --- START: Penambahan Ikon Kustom ---
-const wisataIcon = new L.Icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+// --- Leaflet Icon Fix & Custom Icons ---
+const createLeafletIcon = (iconUrl: string) => new L.Icon({
+    iconUrl,
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
     iconSize: [25, 41],
     iconAnchor: [12, 41],
@@ -46,151 +21,270 @@ const wisataIcon = new L.Icon({
     shadowSize: [41, 41]
 });
 
-const umkmIcon = new L.Icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41]
-});
-// --- END: Penambahan Ikon Kustom ---
+const wisataIcon = createLeafletIcon('https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png');
+const umkmIcon = createLeafletIcon('https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png');
+const activeIcon = createLeafletIcon('https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png');
 
+
+// --- Helper Component to Set Map Bounds ---
+const MapBoundsSetter = ({ geoJsonData }: { geoJsonData: any }) => {
+    const map = useMap();
+    useEffect(() => {
+        if (geoJsonData) {
+            const bounds = L.geoJSON(geoJsonData).getBounds();
+            if (bounds.isValid()) {
+                map.fitBounds(bounds, { padding: [20, 20] });
+            }
+        }
+    }, [geoJsonData, map]);
+    return null;
+};
+
+// --- Main Component ---
 interface InteractiveMapProps {
-  tourismSpots: TourismSpot[];
-  umkms: Umkm[];
+    tourismSpots: TourismSpot[];
+    umkms: Umkm[];
 }
 
 export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [dusunBoundary, setDusunBoundary] = useState(null);
+    const [selectedCategory, setSelectedCategory] = useState("all");
+    const [geoJsonData, setGeoJsonData] = useState<any>(null);
+    const [activePoi, setActivePoi] = useState<PointOfInterest | null>(null);
+    const [isListVisible, setIsListVisible] = useState(false); // For mobile bottom sheet
+    const mapRef = useRef<L.Map | null>(null);
 
-  // Style untuk layer batas desa dan dusun
-  const desaStyle = { color: "#e67e22", weight: 3, opacity: 0.8, fillOpacity: 0.1 };
-  const dusunStyle = { color: "#e67e22", weight: 1.5, opacity: 0.7, dashArray: '5, 5' };
+    // Fetch GeoJSON data for village boundaries
+    useEffect(() => {
+        fetch('/maps/peta.geojson')
+            .then(res => res.json())
+            .then(data => setGeoJsonData(data))
+            .catch(err => console.error("Gagal memuat batas dusun:", err));
+    }, []);
 
-  useEffect(() => {
-    // Ambil data GeoJSON dari folder public
-    fetch('/maps/peta.geojson')
-        .then(res => res.json())
-        .then(data => setDusunBoundary(data))
-        .catch(err => console.error("Gagal memuat batas dusun:", err));
-  }, []);
+    // Memoize combined and sorted points of interest
+    const pointsOfInterest = useMemo(() => {
+        const spots = tourismSpots.map(spot => ({ ...spot, type: 'wisata' as const }));
+        const umkmItems = umkms.map(umkm => ({ ...umkm, type: 'umkm' as const }));
+        return [...spots, ...umkmItems].sort((a, b) => a.name.localeCompare(b.name));
+    }, [tourismSpots, umkms]);
 
-  // --- START: Fungsi untuk Popup Nama Dusun ---
-  const onEachDusun = (feature, layer) => {
-    if (feature.properties && feature.properties.Keterangan) {
-      layer.bindPopup(feature.properties.Keterangan);
-      layer.on('mouseover', function (e) {
-        this.openPopup();
-      });
-    }
-  };
-  // --- END: Fungsi untuk Popup Nama Dusun ---
+    const filteredPOIs = useMemo(() => {
+        if (selectedCategory === "all") return pointsOfInterest;
+        return pointsOfInterest.filter(poi => poi.type === selectedCategory);
+    }, [selectedCategory, pointsOfInterest]);
 
-  // Gabungkan data wisata dan umkm menjadi satu array untuk ditampilkan di peta
-  const pointsOfInterest = useMemo(() => {
-    const spots = tourismSpots.map(spot => ({
-      ...spot,
-      type: 'wisata' as const,
-    }));
-    const umkmItems = umkms.map(umkm => ({
-      ...umkm,
-      type: 'umkm' as const,
-    }));
-    return [...spots, ...umkmItems];
-  }, [tourismSpots, umkms]);
+    // --- Styling and Event Handlers for GeoJSON ---
+    const dusunColors = ['#a8d8ea', '#aa96da', '#fcbad3', '#ffffd2', '#a1eafb', '#e6c3a3', '#d7bde2'];
 
-  const filteredPOIs = useMemo(() => {
-    if (selectedCategory === "all") return pointsOfInterest;
-    return pointsOfInterest.filter(poi => poi.type === selectedCategory);
-  }, [selectedCategory, pointsOfInterest]);
+    const getDusunStyle = (feature: any) => {
+        const colorIndex = feature.properties.id % dusunColors.length; // Use a property or index
+        return {
+            fillColor: dusunColors[colorIndex],
+            color: "#5D6D7E",
+            weight: 1.5,
+            opacity: 0.8,
+            fillOpacity: 0.5
+        };
+    };
 
-  const getImageUrl = (path: string) => {
-    return path ? `/storage/${path}` : 'https://placehold.co/600x400/png?text=Image';
-  };
+    const onEachDusun = (feature: any, layer: L.Layer) => {
+        if (feature.properties && feature.properties.Keterangan) {
+            layer.bindPopup(feature.properties.Keterangan);
+            layer.on({
+                mouseover: (e) => {
+                    const l = e.target;
+                    l.setStyle({ weight: 3, color: '#c0392b', fillOpacity: 0.7 });
+                    l.openPopup();
+                },
+                mouseout: (e) => {
+                    const l = e.target;
+                    // This is tricky because GeoJSON is a single layer. We reset it.
+                    // A better approach would be to have a reference to the GeoJSON layer and call `resetStyle`.
+                    l.setStyle(getDusunStyle(feature));
+                    l.closePopup();
+                }
+            });
+        }
+    };
 
-  // Tentukan titik tengah peta, bisa dari data pertama atau lokasi desa
-  const mapCenter: [number, number] = pointsOfInterest.length > 0
-    ? [parseFloat(pointsOfInterest[0].latitude), parseFloat(pointsOfInterest[0].longitude)]
-    : [-0.26047206364560166, 109.24124454050668]; // Default jika tidak ada data
+    // --- Interactivity Handlers ---
+    const handlePoiClick = (poi: PointOfInterest) => {
+        setActivePoi(poi);
+        if (mapRef.current && poi.latitude && poi.longitude) {
+            mapRef.current.flyTo([parseFloat(poi.latitude), parseFloat(poi.longitude)], 16, {
+                animate: true,
+                duration: 1.5
+            });
+        }
+        // On mobile, hide the list after clicking to show the map
+        if (window.innerWidth < 1024) {
+            setIsListVisible(false);
+        }
+    };
 
-  return (
-    <section id="map" className="py-20 bg-white">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Peta Wisata Interaktif
-          </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Jelajahi semua destinasi menarik di Desa Sungai Deras dengan peta interaktif
-          </p>
-        </div>
+    const getImageUrl = (galleries: any[] | undefined) => {
+        const path = galleries?.[0]?.path;
+        return path ? `/storage/${path}` : 'https://placehold.co/300x200/e0e0e0/757575?text=Gambar';
+    };
 
-        <div className="grid lg:grid-cols-4 gap-8">
-          {/* Filter Sidebar */}
-          <div className="lg:col-span-1">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Filter className="w-5 h-5 mr-2" />
-                  Filter Kategori
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {categories.map((category) => {
-                  const Icon = category.icon;
-                  return (
-                    <Button
-                      key={category.id}
-                      variant={selectedCategory === category.id ? "default" : "ghost"}
-                      className={`w-full justify-start ${selectedCategory === category.id ? "bg-primary" : ""}`}
-                      onClick={() => setSelectedCategory(category.id)}
-                    >
-                      <Icon className="w-4 h-4 mr-2" />
-                      {category.name}
-                    </Button>
-                  );
-                })}
-              </CardContent>
-            </Card>
-          </div>
+    // Default map center, will be overridden by MapBoundsSetter
+    const defaultCenter: [number, number] = [-0.260472, 109.241244];
 
-          {/* Map Area */}
-          <div className="lg:col-span-3">
-            <Card className="overflow-hidden h-[600px] w-full">
-              <MapContainer center={mapCenter} zoom={14} scrollWheelZoom={false} className="h-full w-full">
-                <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
+    return (
+        <section id="map" className="py-20 bg-teal-50 dark:bg-gray-800">
+            <div className="container mx-auto px-0 md:px-4">
+                <div className="text-center mb-8 md:mb-12 px-4">
+                    <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">
+                        Peta Interaktif Desa
+                    </h2>
+                    <p className="text-md md:text-lg text-gray-600 max-w-3xl mx-auto">
+                        Jelajahi setiap sudut Desa Sungai Deras, temukan lokasi wisata dan produk UMKM unggulan.
+                    </p>
+                </div>
 
-                {/* Tampilkan layer GeoJSON jika data sudah dimuat */}
-                {dusunBoundary && <GeoJSON data={dusunBoundary} style={dusunStyle} onEachFeature={onEachDusun} />}
+                <div className="relative h-[calc(100vh-250px)] md:h-[650px] w-full lg:grid lg:grid-cols-12 lg:gap-6 rounded-lg md:shadow-xl overflow-hidden">
 
+                    {/* --- Sidebar for Desktop, hidden on mobile --- */}
+                    <aside className="hidden lg:block lg:col-span-4 h-full overflow-y-auto bg-white p-1">
+                        <PoiList
+                            pois={filteredPOIs}
+                            activePoi={activePoi}
+                            onPoiClick={handlePoiClick}
+                            selectedCategory={selectedCategory}
+                            onCategoryChange={setSelectedCategory}
+                            getImageUrl={getImageUrl}
+                        />
+                    </aside>
 
-                {filteredPOIs.map((poi) => {
-                  if (!poi.latitude || !poi.longitude) return null;
-                  // Pilih ikon berdasarkan tipe
-                  const markerIcon = poi.type === 'wisata' ? wisataIcon : umkmIcon;
-                  return (
-                    <Marker key={`${poi.type}-${poi.id}`} position={[parseFloat(poi.latitude), parseFloat(poi.longitude)]} icon={markerIcon}>
-                      <Popup>
-                        <div className="w-48">
-                          <img src={getImageUrl(poi.galleries[0]?.path)} alt={poi.name} className="w-full h-24 object-cover rounded-md mb-2" />
-                          <h4 className="font-bold text-md">{poi.name}</h4>
-                          <p className="text-xs text-muted-foreground line-clamp-2">{poi.description}</p>
-                          <Badge variant="outline" className="mt-2">{poi.category.name}</Badge>
+                    {/* --- Map Area --- */}
+                    <div className="lg:col-span-8 h-full w-full">
+                        <MapContainer
+                            center={defaultCenter}
+                            zoom={14}
+                            scrollWheelZoom={true}
+                            className="h-full w-full z-0"
+                            whenCreated={(mapInstance) => { mapRef.current = mapInstance; }}
+                        >
+                            <TileLayer
+                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                            />
+
+                            {geoJsonData && <MapBoundsSetter geoJsonData={geoJsonData} />}
+                            {geoJsonData && <GeoJSON data={geoJsonData} style={getDusunStyle} onEachFeature={onEachDusun} />}
+
+                            {filteredPOIs.map((poi) => {
+                                if (!poi.latitude || !poi.longitude) return null;
+                                return (
+                                    <Marker
+                                        key={`${poi.type}-${poi.id}`}
+                                        position={[parseFloat(poi.latitude), parseFloat(poi.longitude)]}
+                                        icon={activePoi?.id === poi.id ? activeIcon : (poi.type === 'wisata' ? wisataIcon : umkmIcon)}
+                                        eventHandlers={{
+                                            click: () => setActivePoi(poi),
+                                        }}
+                                    >
+                                        <Popup>
+                                            <div className="w-48">
+                                                <img src={getImageUrl(poi.galleries)} alt={poi.name} className="w-full h-24 object-cover rounded-md mb-2" />
+                                                <h4 className="font-bold text-md">{poi.name}</h4>
+                                                <Badge variant="secondary" className="mt-1">{poi.category.name}</Badge>
+                                            </div>
+                                        </Popup>
+                                    </Marker>
+                                );
+                            })}
+                        </MapContainer>
+                    </div>
+
+                    {/* --- Mobile Bottom Sheet & Toggle Button --- */}
+                    <div className="lg:hidden">
+                        <Button
+                            onClick={() => setIsListVisible(!isListVisible)}
+                            className="absolute bottom-4 right-4 z-10 rounded-full h-14 w-14 shadow-lg"
+                            aria-label="Tampilkan Daftar"
+                        >
+                            {isListVisible ? <X className="h-6 w-6" /> : <List className="h-6 w-6" />}
+                        </Button>
+
+                        <div className={`absolute bottom-0 left-0 right-0 z-10 bg-white rounded-t-2xl shadow-2xl transition-transform duration-500 ease-in-out ${isListVisible ? 'translate-y-0' : 'translate-y-full'}`}
+                             style={{ height: '70vh' }}
+                        >
+                             <div className="p-4 border-b border-gray-200">
+                                <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto"></div>
+                                <h3 className="text-center font-semibold text-lg mt-2">Jelajahi Desa</h3>
+                             </div>
+                            <div className="h-[calc(100%-70px)] overflow-y-auto p-1">
+                                <PoiList
+                                    pois={filteredPOIs}
+                                    activePoi={activePoi}
+                                    onPoiClick={handlePoiClick}
+                                    selectedCategory={selectedCategory}
+                                    onCategoryChange={setSelectedCategory}
+                                    getImageUrl={getImageUrl}
+                                />
+                            </div>
                         </div>
-                      </Popup>
-                    </Marker>
-                  )
-                })}
-              </MapContainer>
-            </Card>
-          </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    );
+}
+
+
+// --- Sub-component for rendering the POI list (reused for mobile/desktop) ---
+const PoiList = ({ pois, activePoi, onPoiClick, selectedCategory, onCategoryChange, getImageUrl }: any) => {
+    const categories = [
+        { id: "all", name: "Semua", icon: MapPin },
+        { id: "wisata", name: "Wisata", icon: Mountain },
+        { id: "umkm", name: "UMKM", icon: Store },
+    ];
+
+    return (
+        <div>
+            <div className="p-4 sticky top-0 bg-white/80 backdrop-blur-sm z-10">
+                <h3 className="text-xl font-bold mb-3">Kategori Lokasi</h3>
+                <div className="flex space-x-2">
+                    {categories.map(cat => (
+                        <Button
+                            key={cat.id}
+                            variant={selectedCategory === cat.id ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => onCategoryChange(cat.id)}
+                            className="flex-1 transition-all duration-300"
+                        >
+                            <cat.icon className="w-4 h-4 mr-2" />
+                            {cat.name}
+                        </Button>
+                    ))}
+                </div>
+            </div>
+
+            <div className="p-2 space-y-2">
+                {pois.length > 0 ? pois.map((poi: PointOfInterest) => (
+                    <div
+                        key={`${poi.type}-${poi.id}`}
+                        onClick={() => onPoiClick(poi)}
+                        className={`flex items-center p-3 rounded-lg cursor-pointer transition-all duration-300 ${activePoi?.id === poi.id ? 'bg-primary/10 ring-2 ring-primary' : 'hover:bg-gray-100'}`}
+                    >
+                        <img src={getImageUrl(poi.galleries)} alt={poi.name} className="w-16 h-16 object-cover rounded-md mr-4 flex-shrink-0" />
+                        <div className="flex-grow">
+                            <p className="font-semibold text-gray-800 line-clamp-1">{poi.name}</p>
+                            <p className="text-sm text-gray-500 line-clamp-1">{poi.category.name}</p>
+                        </div>
+                        <Badge variant={poi.type === 'wisata' ? 'default' : 'secondary'} className={`capitalize text-xs ${poi.type === 'wisata' ? 'bg-green-600' : 'bg-purple-600'}`}>
+                            {poi.type}
+                        </Badge>
+                    </div>
+                )) : (
+                    <div className="text-center py-10 px-4">
+                        <Search className="mx-auto h-10 w-10 text-gray-400" />
+                        <p className="mt-2 text-gray-600">Tidak ada lokasi ditemukan untuk kategori ini.</p>
+                    </div>
+                )}
+            </div>
         </div>
-      </div>
-    </section>
-  );
+    );
 }

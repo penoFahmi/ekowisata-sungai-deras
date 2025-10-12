@@ -1,6 +1,7 @@
 import { MapPin, Phone, Mail, Facebook, Instagram, Youtube } from "lucide-react";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
+import { Link } from "@inertiajs/react";
 
 export function Footer() {
   const quickLinks = [

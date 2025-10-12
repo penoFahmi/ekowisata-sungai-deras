@@ -34,9 +34,8 @@ export function EventsSection({ agendas }: EventsSectionProps) {
   };
 
   return (
-    <section id="events" className="py-20 bg-muted/30">
-      {/* <div className="container mx-auto px-4"> */}
-      <div className="min-h-screen bg-gradient-to-b from-white to-slate-100 dark:from-slate-900 dark:to-slate-950">
+    <section id="events" className="py-20 bg-teal-50 dark:bg-gray-800">
+      <div className="min-h-screen bg-gradient-to-b">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Agenda & Acara Mendatang

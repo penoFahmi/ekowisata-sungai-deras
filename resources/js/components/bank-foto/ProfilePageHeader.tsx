@@ -39,7 +39,7 @@ export function ProfilePageHeader() {
             <Link href={route('bank-foto.index')}>
                 <Button variant="outline" className="bg-white/50 hover:bg-white/80">
                     <ArrowLeft className="h-4 w-4 mr-2" />
-                    Kembali ke Galeri
+                    Ke Galeri
                 </Button>
             </Link>
             <DropdownMenu>

@@ -61,7 +61,7 @@ export function PhotoCard({
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-        <div className="absolute top-3 right-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0" onClick={e => e.stopPropagation()}>
+        <div className="absolute top-3 right-3 z-10 flex items-center gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300" onClick={e => e.stopPropagation()}>
           <Button size="icon" variant="secondary" className="h-8 w-8 p-0 bg-white/90 hover:bg-white backdrop-blur-sm shadow-lg" onClick={() => onLike?.(id)}>
             <Heart className={`h-4 w-4 ${is_liked ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
           </Button>
