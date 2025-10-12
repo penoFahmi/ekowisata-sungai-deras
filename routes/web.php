@@ -32,13 +32,17 @@ Route::get('/storage-link', function () {
     return 'Symbolic link has been created.';
 });
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware([
+    'auth',
+    'verified',
+    'role:administrator,pengelola-wisata,pengelola-umkm,pengelola-bank-foto-digital'
+    ])->group(function () {
 
-    Route::get('profile', [ProfileController::class, 'profile'])->name('profile');
-    Route::post('bank-foto', [BankFotoController::class, 'store'])->name('bank-foto.store');
-    Route::post('bank-foto/{photo}/like', [BankFotoController::class, 'like'])->name('bank-foto.like');
-    Route::put('bank-foto/{photo}', [BankFotoController::class, 'update'])->name('bank-foto.update');
-    Route::delete('bank-foto/{photo}', [BankFotoController::class, 'destroy'])->name('bank-foto.destroy');
+    // Route::get('profile', [ProfileController::class, 'profile'])->name('profile');
+    // Route::post('bank-foto', [BankFotoController::class, 'store'])->name('bank-foto.store');
+    // Route::post('bank-foto/{photo}/like', [BankFotoController::class, 'like'])->name('bank-foto.like');
+    // Route::put('bank-foto/{photo}', [BankFotoController::class, 'update'])->name('bank-foto.update');
+    // Route::delete('bank-foto/{photo}', [BankFotoController::class, 'destroy'])->name('bank-foto.destroy');
 
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::resource('users', UserController::class)->except(['create', 'edit', 'show']);
@@ -49,6 +53,29 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('setting', function () {
         return Inertia::render('dashboard/setting');
     })->name('setting');
+
+});
+
+Route::middleware([
+    'auth',
+    'verified',
+    ])->group(function () {
+
+    Route::get('profile', [ProfileController::class, 'profile'])->name('profile');
+    Route::post('bank-foto', [BankFotoController::class, 'store'])->name('bank-foto.store');
+    Route::post('bank-foto/{photo}/like', [BankFotoController::class, 'like'])->name('bank-foto.like');
+    Route::put('bank-foto/{photo}', [BankFotoController::class, 'update'])->name('bank-foto.update');
+    Route::delete('bank-foto/{photo}', [BankFotoController::class, 'destroy'])->name('bank-foto.destroy');
+
+    // Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    // Route::resource('users', UserController::class)->except(['create', 'edit', 'show']);
+    // Route::resource('kategori', CategoryController::class)->except(['create', 'edit', 'show']);
+    // Route::resource('wisata', TourismSpotController::class)->except(['create', 'edit', 'show']);
+    // Route::resource('umkm', UmkmController::class)->except(['create', 'edit', 'show']);
+    // Route::resource('agenda', AgendaController::class)->except(['create', 'edit', 'show']);
+    // Route::get('setting', function () {
+    //     return Inertia::render('dashboard/setting');
+    // })->name('setting');
 
 });
 

@@ -55,7 +55,7 @@ class AuthenticatedSessionController extends Controller
         }
 
         // Jika tidak, berarti dia adalah 'user-terdaftar'
-        return redirect()->intended(route('home'));
+        return redirect()->intended(route('profile'));
         // --- SELESAI PERBAIKAN ---
     }
 

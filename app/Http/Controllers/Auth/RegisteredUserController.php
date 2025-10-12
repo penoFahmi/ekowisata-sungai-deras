@@ -55,6 +55,6 @@ class RegisteredUserController extends Controller
 
         // --- PERBAIKAN 2: Arahkan ke halaman yang benar ---
         // Redirect ke halaman home, bukan dashboard.
-        return redirect()->route('home')->with('success', 'Pendaftaran berhasil! Selamat datang.');
+        return redirect()->route('profile')->with('success', 'Pendaftaran berhasil! Selamat datang.');
     }
 }
