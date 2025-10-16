@@ -86,99 +86,100 @@ export default function ModalFormPhoto({ isOpen, onClose, onSuccess }: ModalForm
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            {/* UPDATE: Menggunakan bg-slate-50 agar konsisten dengan tema Soft Light */}
-            <DialogContent className="sm:max-w-2xl bg-slate-50">
+            {/* UPDATE 1: Tambahkan flex, flex-col, dan max-h-[90vh] untuk membuat layout yang bisa di-scroll */}
+            <DialogContent className="sm:max-w-2xl bg-slate-50 flex flex-col max-h-[90vh]">
                 <DialogHeader>
-                    {/* UPDATE: Menyesuaikan warna teks header */}
                     <DialogTitle className="text-slate-900">Upload Foto Baru</DialogTitle>
                     <DialogDescription>Bagikan foto kerajinan atau wisata terbaik Anda ke Bank Foto Digital.</DialogDescription>
                 </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4 py-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="title" className="text-slate-700">Judul Foto</Label>
-                        {/* UPDATE: Input diberi bg-white agar menonjol dari background */}
-                        <Input id="title" value={data.title} onChange={e => setData('title', e.target.value)} placeholder="Contoh: Pemandangan Senja di Sungai Deras" className="bg-white" />
-                        {errors.title && <p className="text-sm text-destructive">{errors.title}</p>}
-                    </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="description" className="text-slate-700">Deskripsi (Opsional)</Label>
-                        <Textarea id="description" value={data.description} onChange={e => setData('description', e.target.value)} placeholder="Ceritakan sedikit tentang foto Anda..." className="bg-white" />
-                        {errors.description && <p className="text-sm text-destructive">{errors.description}</p>}
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* UPDATE 2: Bungkus form dengan div yang memiliki overflow-y-auto dan flex-1 */}
+                <div className="flex-1 overflow-y-auto -mx-6 px-6 py-4">
+                    <form onSubmit={handleSubmit} id="photo-form" className="space-y-4">
                         <div className="space-y-2">
-                            <Label htmlFor="category" className="text-slate-700">Kategori</Label>
-                            <Select onValueChange={value => setData('category', value)} value={data.category}>
-                                <SelectTrigger className="bg-white">
-                                    <SelectValue placeholder="Pilih kategori..." />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="wisata">Wisata</SelectItem>
-                                    <SelectItem value="kerajinan">Kerajinan</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            {errors.category && <p className="text-sm text-destructive">{errors.category}</p>}
+                            <Label htmlFor="title" className="text-slate-700">Judul Foto</Label>
+                            <Input id="title" value={data.title} onChange={e => setData('title', e.target.value)} placeholder="Contoh: Pemandangan Senja di Sungai Deras" className="bg-white" />
+                            {errors.title && <p className="text-sm text-destructive">{errors.title}</p>}
                         </div>
+
                         <div className="space-y-2">
-                            <Label htmlFor="image" className="text-slate-700">File Gambar</Label>
-                            <Input
-                                id="image"
-                                type="file"
-                                accept="image/*"
-                                className="bg-white file:text-slate-600 file:font-medium file:bg-slate-100 file:border-none file:px-4 file:py-2 file:mr-4 file:rounded-l-md hover:file:bg-slate-200"
-                                onChange={e => {
-                                    const file = e.target.files ? e.target.files[0] : null;
-                                    setData('image', file);
-                                }}
-                            />
-                            {preview && <img src={preview} alt="Preview" className="mt-2 rounded-md max-h-48 w-full object-cover" />}
-                            {progress && (
-                                <div className="w-full bg-slate-200 rounded-full mt-2">
-                                    <div className="bg-purple-600 text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full" style={{ width: `${progress.percentage}%` }} />
-                                </div>
-                            )}
-                            {errors.image && <p className="text-sm text-destructive">{errors.image}</p>}
+                            <Label htmlFor="description" className="text-slate-700">Deskripsi (Opsional)</Label>
+                            <Textarea id="description" value={data.description} onChange={e => setData('description', e.target.value)} placeholder="Ceritakan sedikit tentang foto Anda..." className="bg-white" />
+                            {errors.description && <p className="text-sm text-destructive">{errors.description}</p>}
                         </div>
-                    </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="tags" className="text-slate-700">Tags (Opsional)</Label>
-                        {/* UPDATE: Container tag diberi bg-white dan border yang sesuai */}
-                        <div className="flex flex-wrap gap-2 p-2 border border-slate-200 rounded-md bg-white">
-                            {data.tags.map(tag => (
-                                <div key={tag} className="flex items-center gap-1 bg-purple-100 text-purple-800 text-sm font-medium px-2.5 py-0.5 rounded-full">
-                                    {tag}
-                                    <Button type="button" variant="ghost" size="icon" onClick={() => removeTag(tag)} className="h-auto w-auto p-0.5 text-purple-500 hover:text-purple-700 hover:bg-purple-200">
-                                        <X size={14} />
-                                    </Button>
-                                </div>
-                            ))}
-                            <Input
-                                id="tags"
-                                value={tagInput}
-                                onChange={e => setTagInput(e.target.value)}
-                                onKeyDown={handleTagKeyDown}
-                                placeholder="Ketik tag lalu tekan Enter..."
-                                className="flex-1 border-none shadow-none focus-visible:ring-0 bg-transparent"
-                            />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="category" className="text-slate-700">Kategori</Label>
+                                <Select onValueChange={value => setData('category', value)} value={data.category}>
+                                    <SelectTrigger className="bg-white">
+                                        <SelectValue placeholder="Pilih kategori..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="wisata">Wisata</SelectItem>
+                                        <SelectItem value="kerajinan">Kerajinan</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                {errors.category && <p className="text-sm text-destructive">{errors.category}</p>}
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="image" className="text-slate-700">File Gambar</Label>
+                                <Input
+                                    id="image"
+                                    type="file"
+                                    accept="image/*"
+                                    className="bg-white file:text-slate-600 file:font-medium file:bg-slate-100 file:border-none file:px-4 file:py-2 file:mr-4 file:rounded-l-md hover:file:bg-slate-200"
+                                    onChange={e => {
+                                        const file = e.target.files ? e.target.files[0] : null;
+                                        setData('image', file);
+                                    }}
+                                />
+                                {preview && <img src={preview} alt="Preview" className="mt-2 rounded-md max-h-48 w-full object-cover" />}
+                                {progress && (
+                                    <div className="w-full bg-slate-200 rounded-full mt-2">
+                                        <div className="bg-purple-600 text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full" style={{ width: `${progress.percentage}%` }} />
+                                    </div>
+                                )}
+                                {errors.image && <p className="text-sm text-destructive">{errors.image}</p>}
+                            </div>
                         </div>
-                        <p className="text-xs text-muted-foreground">
-                            Saran: {availableTags.slice(0, 5).map(t => t.name).join(', ')}
-                        </p>
-                        {errors.tags && <p className="text-sm text-destructive">{errors.tags}</p>}
-                    </div>
 
-                    {/* UPDATE: Footer diberi border atas untuk pemisah visual */}
-                    <DialogFooter className="pt-4 mt-4 border-t border-slate-200">
-                        <Button type="button" variant="outline" onClick={onClose} className="bg-white">Batal</Button>
-                        <Button type="submit" disabled={processing} className="bg-purple-600 hover:bg-purple-700">
-                            {processing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Upload Foto
-                        </Button>
-                    </DialogFooter>
-                </form>
+                        <div className="space-y-2">
+                            <Label htmlFor="tags" className="text-slate-700">Tags (Opsional)</Label>
+                            <div className="flex flex-wrap gap-2 p-2 border border-slate-200 rounded-md bg-white">
+                                {data.tags.map(tag => (
+                                    <div key={tag} className="flex items-center gap-1 bg-purple-100 text-purple-800 text-sm font-medium px-2.5 py-0.5 rounded-full">
+                                        {tag}
+                                        <Button type="button" variant="ghost" size="icon" onClick={() => removeTag(tag)} className="h-auto w-auto p-0.5 text-purple-500 hover:text-purple-700 hover:bg-purple-200">
+                                            <X size={14} />
+                                        </Button>
+                                    </div>
+                                ))}
+                                <Input
+                                    id="tags"
+                                    value={tagInput}
+                                    onChange={e => setTagInput(e.target.value)}
+                                    onKeyDown={handleTagKeyDown}
+                                    placeholder="Ketik tag lalu tekan Enter..."
+                                    className="flex-1 border-none shadow-none focus-visible:ring-0 bg-transparent"
+                                />
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                                Saran: {availableTags.slice(0, 5).map(t => t.name).join(', ')}
+                            </p>
+                            {errors.tags && <p className="text-sm text-destructive">{errors.tags}</p>}
+                        </div>
+                    </form>
+                </div>
+
+                {/* UPDATE 3: Hubungkan tombol submit ke form menggunakan atribut `form` */}
+                <DialogFooter className="pt-4 mt-auto border-t border-slate-200">
+                    <Button type="button" variant="outline" onClick={onClose} className="bg-white">Batal</Button>
+                    <Button type="submit" form="photo-form" disabled={processing} className="bg-purple-600 hover:bg-purple-700">
+                        {processing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Upload Foto
+                    </Button>
+                </DialogFooter>
             </DialogContent>
         </Dialog>
     );
