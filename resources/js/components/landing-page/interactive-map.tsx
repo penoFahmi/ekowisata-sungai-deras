@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { MapPin, Mountain, Store, X, List, Search } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup, GeoJSON, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+import { Input } from "@/components/ui/input";
 import L from 'leaflet';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -15,20 +16,18 @@ interface InteractiveMapProps {
     umkms: Umkm[];
 }
 
-const createLeafletIcon = (iconUrl: string, size: [number, number] = [25, 41]) => new L.Icon({
+const createLeafletIcon = (iconUrl: string) => new L.Icon({
     iconUrl,
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-    iconSize: size,
-    iconAnchor: [size[0] / 2, size[1]],
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
     popupAnchor: [1, -34],
     shadowSize: [41, 41]
 });
 
-const wisataIcon = createLeafletIcon('https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-teal.png');
-const umkmIcon = createLeafletIcon('https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png');
-const activeIcon = createLeafletIcon('https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png');
-const wisataIconHover = createLeafletIcon('https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-teal.png', [30, 49]);
-const umkmIconHover = createLeafletIcon('https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png', [30, 49]);
+const wisataIcon = createLeafletIcon('/camera-take-pictures-svgrepo-com.svg');
+const umkmIcon = createLeafletIcon('/shopping-cart-svgrepo-com.svg');
+const activeIcon = createLeafletIcon('/feet-svgrepo-com.svg');
 
 const MapBoundsSetter = ({ geoJsonData }: { geoJsonData: any }) => {
     const map = useMap();
@@ -48,6 +47,7 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
     const [geoJsonData, setGeoJsonData] = useState<any>(null);
     const [activePoi, setActivePoi] = useState<PointOfInterest | null>(null);
     const [hoveredPoiId, setHoveredPoiId] = useState<number | null>(null);
+    const [searchTerm, setSearchTerm] = useState("");
     const [isListVisible, setIsListVisible] = useState(false);
     const mapRef = useRef<L.Map | null>(null);
 
@@ -74,15 +74,21 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
     }, [tourismSpots, umkms]);
 
     const filteredPOIs = useMemo(() => {
-        if (selectedCategory === "all") return pointsOfInterest;
-        return pointsOfInterest.filter(poi => poi.type === selectedCategory);
-    }, [selectedCategory, pointsOfInterest]);
+        return pointsOfInterest.filter(poi => {
+            const matchesCategory = selectedCategory === "all" || poi.type === selectedCategory;
+            const matchesSearch = searchTerm === "" ||
+                                  poi.name.toLowerCase().includes(searchTerm.toLowerCase());
+            return matchesCategory && matchesSearch;
+        });
+    }, [selectedCategory, searchTerm, pointsOfInterest]);
 
     const dusunColors: { [key: string]: string } = {
-        "Dusun Riam Cermin": "#A7D7C5",
-        "Dusun Setioso": "#F7D4A8",
+        "Dusun Beringin": "#82a9d1",         // Biru
+        "Dusun Pinang A": "#87c7a3",         // Hijau
+        "Dusun Pendamar": "#e39a9b",        // Merah Muda
+        "Dusun Gunung Ambawang": "#f7d4a8",  // Oranye
+        // Nama dusun di bawah ini tidak ada di geojson, tapi dipertahankan untuk referensi
         "Dusun Sungai Deras": "#C2DED1",
-        "Dusun Sempurna": "#FBE6C6",
         "DEFAULT": "#E0E0E0"
     };
 
@@ -122,7 +128,16 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
         }
     };
 
-    const handlePoiHover = (id: number | null) => setHoveredPoiId(id);
+    const handlePoiHover = (poi: PointOfInterest | null) => {
+        setHoveredPoiId(poi ? poi.id : null);
+        if (poi && mapRef.current && poi.latitude && poi.longitude) {
+            mapRef.current.flyTo([parseFloat(poi.latitude), parseFloat(poi.longitude)], 16, {
+                animate: true,
+                duration: 0.7, // Durasi lebih cepat untuk efek hover
+                easeLinearity: 0.5
+            });
+        }
+    };
 
     const getImageUrl = (galleries: any[] | undefined) => {
         const path = galleries?.[0]?.path;
@@ -151,12 +166,16 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
                     className="relative h-[calc(100vh-200px)] md:h-[650px] w-full lg:grid lg:grid-cols-12 lg:gap-6 rounded-lg md:shadow-xl overflow-hidden border border-stone-200 dark:border-slate-700"
                 >
                     <aside className="hidden lg:block lg:col-span-4 h-full overflow-y-auto bg-white dark:bg-slate-800 p-1">
+                        <FilterControls
+                            selectedCategory={selectedCategory}
+                            onCategoryChange={setSelectedCategory}
+                            searchTerm={searchTerm}
+                            onSearchChange={setSearchTerm}
+                        />
                         <PoiList
                             pois={filteredPOIs}
                             activePoi={activePoi}
                             onPoiClick={handlePoiClick}
-                            selectedCategory={selectedCategory}
-                            onCategoryChange={setSelectedCategory}
                             getImageUrl={getImageUrl}
                             onPoiHover={handlePoiHover}
                         />
@@ -180,12 +199,10 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
 
                             {filteredPOIs.map((poi) => {
                                 if (!poi.latitude || !poi.longitude) return null;
-                                const isHovered = hoveredPoiId === poi.id;
-                                const isActive = activePoi?.id === poi.id;
+                                const isActive = activePoi?.id === poi.id && activePoi?.type === poi.type;
 
                                 const getIcon = () => {
                                     if (isActive) return activeIcon;
-                                    if (isHovered) return poi.type === 'wisata' ? wisataIconHover : umkmIconHover;
                                     return poi.type === 'wisata' ? wisataIcon : umkmIcon;
                                 };
 
@@ -208,6 +225,11 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
                                 );
                             })}
                         </MapContainer>
+                    </div>
+
+                    {/* Map Legend */}
+                    <div className="absolute bottom-4 left-4 z-[1000] lg:bottom-auto lg:top-4 lg:left-auto lg:right-4">
+                        <MapLegend dusunColors={dusunColors} />
                     </div>
 
                     <div className="lg:hidden">
@@ -256,12 +278,16 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
                                         <h3 className="text-center font-semibold text-lg mt-2 text-gray-800 dark:text-slate-200">Jelajahi Desa</h3>
                                     </div>
                                     <div className="h-[calc(100%-70px)] overflow-y-auto p-1">
+                                        <FilterControls
+                                            selectedCategory={selectedCategory}
+                                            onCategoryChange={setSelectedCategory}
+                                            searchTerm={searchTerm}
+                                            onSearchChange={setSearchTerm}
+                                        />
                                         <PoiList
                                             pois={filteredPOIs}
                                             activePoi={activePoi}
                                             onPoiClick={handlePoiClick}
-                                            selectedCategory={selectedCategory}
-                                            onCategoryChange={setSelectedCategory}
                                             getImageUrl={getImageUrl}
                                             onPoiHover={handlePoiHover}
                                         />
@@ -276,41 +302,92 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
     );
 }
 
-const PoiList = ({ pois, activePoi, onPoiClick, selectedCategory, onCategoryChange, getImageUrl, onPoiHover }: any) => {
+const FilterControls = ({ selectedCategory, onCategoryChange, searchTerm, onSearchChange }: any) => {
     const categories = [
         { id: "all", name: "Semua", icon: MapPin },
         { id: "wisata", name: "Wisata", icon: Mountain },
         { id: "umkm", name: "UMKM", icon: Store },
     ];
+    return (
+        <div className="p-4 sticky top-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm z-10 space-y-4">
+            <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-stone-400 w-5 h-5" />
+                <Input
+                    placeholder="Cari nama lokasi..."
+                    value={searchTerm}
+                    onChange={(e) => onSearchChange(e.target.value)}
+                    className="pl-10 bg-white dark:bg-slate-700 border-stone-300 dark:border-slate-600"
+                />
+            </div>
+            <div className="flex space-x-2">
+                {categories.map(cat => (
+                    <Button
+                        key={cat.id}
+                        variant={selectedCategory === cat.id ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => onCategoryChange(cat.id)}
+                        className={`flex-1 transition-all duration-300 ${selectedCategory === cat.id ? 'bg-amber-600 hover:bg-amber-700 text-white' : 'border-stone-300 dark:border-slate-600'}`}
+                    >
+                        <cat.icon className="w-4 h-4 mr-2" />
+                        {cat.name}
+                    </Button>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+const MapLegend = ({ dusunColors }: { dusunColors: { [key: string]: string } }) => {
+    // Filter out keys that we don't want to show in the legend
+    const dusunEntries = Object.entries(dusunColors).filter(([key]) => key !== "DEFAULT" && key !== "Dusun Sungai Deras");
+
+    const iconEntries = [
+        { name: 'Wisata', iconUrl: wisataIcon.options.iconUrl },
+        { name: 'UMKM', iconUrl: umkmIcon.options.iconUrl },
+    ];
 
     return (
-        <div>
-            <div className="p-4 sticky top-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm z-10">
-                <h3 className="text-xl font-bold mb-3 text-teal-900 dark:text-teal-200">Kategori Lokasi</h3>
-                <div className="flex space-x-2">
-                    {categories.map(cat => (
-                        <Button
-                            key={cat.id}
-                            variant={selectedCategory === cat.id ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => onCategoryChange(cat.id)}
-                            className={`flex-1 transition-all duration-300 ${selectedCategory === cat.id ? 'bg-amber-600 hover:bg-amber-700 text-white' : 'border-stone-300 dark:border-slate-600'}`}
-                        >
-                            <cat.icon className="w-4 h-4 mr-2" />
-                            {cat.name}
-                        </Button>
-                    ))}
+        <div className="p-3 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-lg shadow-lg border border-stone-200 dark:border-slate-700 w-48">
+            <h4 className="font-bold text-sm mb-3 text-gray-800 dark:text-slate-200 border-b pb-1 border-stone-200 dark:border-slate-600">Legenda</h4>
+            <div className="space-y-3">
+                <div>
+                    <h5 className="font-semibold text-xs mb-2 text-gray-600 dark:text-slate-400">Tipe Lokasi</h5>
+                    <ul className="space-y-1.5">
+                        {iconEntries.map(item => (
+                            <li key={item.name} className="flex items-center">
+                                <img src={item.iconUrl} alt={item.name} className="w-4 h-auto mr-2" />
+                                <span className="text-xs text-gray-700 dark:text-slate-300">{item.name}</span>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+                <div>
+                    <h5 className="font-semibold text-xs mb-2 text-gray-600 dark:text-slate-400">Wilayah Dusun</h5>
+                    <ul className="space-y-1.5">
+                        {dusunEntries.map(([name, color]) => (
+                            <li key={name} className="flex items-center">
+                                <span className="w-3 h-3 rounded-sm mr-2" style={{ backgroundColor: color }}></span>
+                                <span className="text-xs text-gray-700 dark:text-slate-300">{name}</span>
+                            </li>
+                        ))}
+                    </ul>
                 </div>
             </div>
+        </div>
+    );
+};
 
+const PoiList = ({ pois, activePoi, onPoiClick, getImageUrl, onPoiHover }: any) => {
+    return (
+        <div className="h-full">
             <div className="p-2 space-y-2">
                 {pois.length > 0 ? pois.map((poi: PointOfInterest) => (
                     <div
                         key={`${poi.type}-${poi.id}`}
                         onClick={() => onPoiClick(poi)}
-                        onMouseEnter={() => onPoiHover(poi.id)}
-                        onMouseLeave={() => onPoiHover(null)}
-                        className={`flex items-center p-3 rounded-lg cursor-pointer transition-all duration-300 ${activePoi?.id === poi.id ? 'bg-amber-100 dark:bg-amber-900/50 ring-2 ring-amber-500' : 'hover:bg-stone-100 dark:hover:bg-slate-700'}`}
+                        onMouseEnter={() => onPoiHover(poi)}
+                        onMouseLeave={() => onPoiHover(null)} // Anda bisa memilih untuk tidak melakukan apa-apa saat mouse leave
+                        className={`flex items-center p-3 rounded-lg cursor-pointer transition-all duration-300 ${activePoi?.id === poi.id && activePoi?.type === poi.type ? 'bg-amber-100 dark:bg-amber-900/50 ring-2 ring-amber-500' : 'hover:bg-stone-100 dark:hover:bg-slate-700'}`}
                     >
                         <img src={getImageUrl(poi.galleries)} alt={poi.name} className="w-16 h-16 object-cover rounded-md mr-4 flex-shrink-0" />
                         <div className="flex-grow overflow-hidden">
