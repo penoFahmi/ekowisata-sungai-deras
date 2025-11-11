@@ -5,9 +5,12 @@ import { Badge } from "@/components/ui/badge";
 import { MapPin, Mountain, Store, X, List, Search } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup, GeoJSON, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
 import { Input } from "@/components/ui/input";
 import L from 'leaflet';
 import { motion, AnimatePresence } from 'framer-motion';
+import { TampilkanPosisiSaya } from '../TampilkanPosisiSaya';
+import { TampilkanRute } from '../TampilkanRute';
 
 type PointOfInterest = (TourismSpot | Umkm) & { type: 'wisata' | 'umkm' };
 
@@ -50,6 +53,13 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
     const [searchTerm, setSearchTerm] = useState("");
     const [isListVisible, setIsListVisible] = useState(false);
     const mapRef = useRef<L.Map | null>(null);
+    const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+    const [generalRoutes, setGeneralRoutes] = useState({
+        wisata: true,
+        umkm: true
+    });
+    const [personalRouteWaypoints, setPersonalRouteWaypoints] = useState<[number, number][] | null>(null);
+
 
     useEffect(() => {
         if (isListVisible) {
@@ -67,6 +77,20 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
             .catch(err => console.error("Gagal memuat batas dusun:", err));
     }, []);
 
+    useEffect(() => {
+        // Jika ada lokasi user DAN ada POI yang diklik
+        if (userLocation && activePoi) {
+            setPersonalRouteWaypoints([
+                userLocation,
+                [parseFloat(activePoi.latitude), parseFloat(activePoi.longitude)]
+            ]);
+        } else {
+            // Jika tidak, hapus rute pribadi
+            setPersonalRouteWaypoints(null);
+        }
+        // HANYA memantau 2 state ini.
+    }, [userLocation, activePoi]);
+
     const pointsOfInterest = useMemo(() => {
         const spots = tourismSpots.map(spot => ({ ...spot, type: 'wisata' as const }));
         const umkmItems = umkms.map(umkm => ({ ...umkm, type: 'umkm' as const }));
@@ -82,12 +106,27 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
         });
     }, [selectedCategory, searchTerm, pointsOfInterest]);
 
+    const waypointsWisata = useMemo(() => {
+        if (!tourismSpots || tourismSpots.length < 2) return null;
+        return tourismSpots.map(spot => [
+            parseFloat(spot.latitude),
+            parseFloat(spot.longitude)
+        ]);
+    }, [tourismSpots]);
+
+    const waypointsUmkm = useMemo(() => {
+        if (!umkms || umkms.length < 2) return null;
+        return umkms.map(umkm => [
+            parseFloat(umkm.latitude),
+            parseFloat(umkm.longitude)
+        ]);
+    }, [umkms]);
+
     const dusunColors: { [key: string]: string } = {
-        "Dusun Beringin": "#82a9d1",         // Biru
-        "Dusun Pinang A": "#87c7a3",         // Hijau
-        "Dusun Pendamar": "#e39a9b",        // Merah Muda
-        "Dusun Gunung Ambawang": "#f7d4a8",  // Oranye
-        // Nama dusun di bawah ini tidak ada di geojson, tapi dipertahankan untuk referensi
+        "Dusun Beringin": "#82a9d1",
+        "Dusun Pinang A": "#87c7a3",
+        "Dusun Pendamar": "#e39a9b",
+        "Dusun Gunung Ambawang": "#f7d4a8",
         "Dusun Sungai Deras": "#C2DED1",
         "DEFAULT": "#E0E0E0"
     };
@@ -133,7 +172,7 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
         if (poi && mapRef.current && poi.latitude && poi.longitude) {
             mapRef.current.flyTo([parseFloat(poi.latitude), parseFloat(poi.longitude)], 16, {
                 animate: true,
-                duration: 0.7, // Durasi lebih cepat untuk efek hover
+                duration: 0.7,
                 easeLinearity: 0.5
             });
         }
@@ -171,6 +210,8 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
                             onCategoryChange={setSelectedCategory}
                             searchTerm={searchTerm}
                             onSearchChange={setSearchTerm}
+                            generalRoutes={generalRoutes}
+                            setGeneralRoutes={setGeneralRoutes}
                         />
                         <PoiList
                             pois={filteredPOIs}
@@ -224,12 +265,36 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
                                     </Marker>
                                 );
                             })}
+
+                        <TampilkanPosisiSaya onLocationFound={setUserLocation} shouldSetView={true} />
+
+                        {generalRoutes.wisata && waypointsWisata && (
+                            <TampilkanRute
+                                waypoints={waypointsWisata}
+                                routeColor={'#e74c3c'}
+                            />
+                        )}
+
+                        {generalRoutes.umkm && waypointsUmkm && (
+                            <TampilkanRute
+                                waypoints={waypointsUmkm}
+                                routeColor={'#2ecc71'}
+                            />
+                        )}
+
+                        {/* Rute personal dirender terakhir agar berada di lapisan atas */}
+                        <TampilkanRute
+                            waypoints={personalRouteWaypoints}
+                            routeColor={'#3498db'}
+                            isPersonalRoute={true}
+                        />
+
                         </MapContainer>
                     </div>
 
                     {/* Map Legend */}
                     <div className="absolute bottom-4 left-4 z-[1000] lg:bottom-auto lg:top-4 lg:left-auto lg:right-4">
-                        <MapLegend dusunColors={dusunColors} />
+                        <MapLegend dusunColors={dusunColors} userLocation={userLocation} mapRef={mapRef} />
                     </div>
 
                     <div className="lg:hidden">
@@ -283,6 +348,8 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
                                             onCategoryChange={setSelectedCategory}
                                             searchTerm={searchTerm}
                                             onSearchChange={setSearchTerm}
+                                            generalRoutes={generalRoutes}
+                                            setGeneralRoutes={setGeneralRoutes}
                                         />
                                         <PoiList
                                             pois={filteredPOIs}
@@ -302,12 +369,19 @@ export function InteractiveMap({ tourismSpots, umkms }: InteractiveMapProps) {
     );
 }
 
-const FilterControls = ({ selectedCategory, onCategoryChange, searchTerm, onSearchChange }: any) => {
+const FilterControls = ({ selectedCategory, onCategoryChange, searchTerm, onSearchChange, generalRoutes, setGeneralRoutes}: any) => {
     const categories = [
         { id: "all", name: "Semua", icon: MapPin },
         { id: "wisata", name: "Wisata", icon: Mountain },
         { id: "umkm", name: "UMKM", icon: Store },
     ];
+
+    const toggleRoute = (routeType: 'wisata' | 'umkm') => {
+        setGeneralRoutes(prev=> ({
+            ...prev,
+            [routeType]: !prev[routeType]
+        }));
+    };
     return (
         <div className="p-4 sticky top-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm z-10 space-y-4">
             <div className="relative">
@@ -333,29 +407,88 @@ const FilterControls = ({ selectedCategory, onCategoryChange, searchTerm, onSear
                     </Button>
                 ))}
             </div>
+            <div className="pt-2 space-y-2 border-t border-stone-200 dark:border-slate-700">
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Tampilkan Rute Umum</label>
+                <Button
+                    onClick={() => toggleRoute('wisata')}
+                    variant={generalRoutes.wisata ? "default" : "outline"}
+                    size="sm"
+                    className={`w-full ${generalRoutes.wisata ? 'bg-red-600 hover:bg-red-700 text-white' : ''}`}
+                >
+                    {generalRoutes.wisata ? "Sembunyikan" : "Tampilkan"} Rute Wisata
+                </Button>
+                <Button
+                    onClick={() => toggleRoute('umkm')}
+                    variant={generalRoutes.umkm ? "default" : "outline"}
+                    size="sm"
+                    className={`w-full ${generalRoutes.umkm ? 'bg-green-600 hover:bg-green-700 text-white' : ''}`}
+                >
+                    {generalRoutes.umkm ? "Sembunyikan" : "Tampilkan"} Rute UMKM
+                </Button>
+            </div>
         </div>
     );
 };
 
-const MapLegend = ({ dusunColors }: { dusunColors: { [key: string]: string } }) => {
-    // Filter out keys that we don't want to show in the legend
+const MapLegend = ({ dusunColors, userLocation, mapRef }: {
+    dusunColors: { [key: string]: string },
+    userLocation: [number, number] | null,
+    mapRef: React.RefObject<L.Map | null>
+}) => {
     const dusunEntries = Object.entries(dusunColors).filter(([key]) => key !== "DEFAULT" && key !== "Dusun Sungai Deras");
 
+    const handleFlyToUserLocation = () => {
+        if (userLocation && mapRef.current) {
+            mapRef.current.flyTo(userLocation, 16, {
+                animate: true,
+                duration: 1
+            });
+        }
+    };
+
     const iconEntries = [
+        { name: 'Posisi Anda', customIcon: <div className="w-4 h-4 rounded-full bg-blue-500 border-2 border-white shadow-md" />, onClick: handleFlyToUserLocation, isClickable: !!userLocation },
         { name: 'Wisata', iconUrl: wisataIcon.options.iconUrl },
         { name: 'UMKM', iconUrl: umkmIcon.options.iconUrl },
     ];
 
+    const routeEntries = [
+        { name: 'Rute Anda', color: '#3498db' },
+        { name: 'Rute Wisata', color: '#e74c3c' },
+        { name: 'Rute UMKM', color: '#2ecc71' },
+    ];
+
     return (
-        <div className="p-3 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-lg shadow-lg border border-stone-200 dark:border-slate-700 w-48">
+        <div className="p-3 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-lg shadow-lg border border-stone-200 dark:border-slate-700 w-52">
             <h4 className="font-bold text-sm mb-3 text-gray-800 dark:text-slate-200 border-b pb-1 border-stone-200 dark:border-slate-600">Legenda</h4>
-            <div className="space-y-3">
+            <div className="space-y-4">
                 <div>
-                    <h5 className="font-semibold text-xs mb-2 text-gray-600 dark:text-slate-400">Tipe Lokasi</h5>
+                    <h5 className="font-semibold text-xs mb-2 text-gray-600 dark:text-slate-400">Ikon Lokasi</h5>
                     <ul className="space-y-1.5">
                         {iconEntries.map(item => (
+                            <li
+                                key={item.name}
+                                onClick={item.onClick}
+                                className={`flex items-center ${item.isClickable ? 'cursor-pointer hover:bg-stone-100 dark:hover:bg-slate-700/50 rounded-md -mx-1 px-1' : ''}`}
+                            >
+                                <div className="w-5 flex justify-center items-center mr-1.5">
+                                    {item.iconUrl ? (
+                                        <img src={item.iconUrl} alt={item.name} className="w-4 h-auto" />
+                                    ) : (
+                                        item.customIcon
+                                    )}
+                                </div>
+                                <span className="text-xs text-gray-700 dark:text-slate-300">{item.name}</span>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+                <div>
+                    <h5 className="font-semibold text-xs mb-2 text-gray-600 dark:text-slate-400">Warna Rute</h5>
+                    <ul className="space-y-1.5">
+                        {routeEntries.map(item => (
                             <li key={item.name} className="flex items-center">
-                                <img src={item.iconUrl} alt={item.name} className="w-4 h-auto mr-2" />
+                                <span className="w-4 h-1 rounded-full mr-2" style={{ backgroundColor: item.color, border: '1px solid rgba(0,0,0,0.2)' }}></span>
                                 <span className="text-xs text-gray-700 dark:text-slate-300">{item.name}</span>
                             </li>
                         ))}
@@ -366,7 +499,7 @@ const MapLegend = ({ dusunColors }: { dusunColors: { [key: string]: string } }) 
                     <ul className="space-y-1.5">
                         {dusunEntries.map(([name, color]) => (
                             <li key={name} className="flex items-center">
-                                <span className="w-3 h-3 rounded-sm mr-2" style={{ backgroundColor: color }}></span>
+                                <span className="w-4 h-3 rounded-sm mr-2" style={{ backgroundColor: color }}></span>
                                 <span className="text-xs text-gray-700 dark:text-slate-300">{name}</span>
                             </li>
                         ))}
@@ -386,7 +519,7 @@ const PoiList = ({ pois, activePoi, onPoiClick, getImageUrl, onPoiHover }: any) 
                         key={`${poi.type}-${poi.id}`}
                         onClick={() => onPoiClick(poi)}
                         onMouseEnter={() => onPoiHover(poi)}
-                        onMouseLeave={() => onPoiHover(null)} // Anda bisa memilih untuk tidak melakukan apa-apa saat mouse leave
+                        onMouseLeave={() => onPoiHover(null)}
                         className={`flex items-center p-3 rounded-lg cursor-pointer transition-all duration-300 ${activePoi?.id === poi.id && activePoi?.type === poi.type ? 'bg-amber-100 dark:bg-amber-900/50 ring-2 ring-amber-500' : 'hover:bg-stone-100 dark:hover:bg-slate-700'}`}
                     >
                         <img src={getImageUrl(poi.galleries)} alt={poi.name} className="w-16 h-16 object-cover rounded-md mr-4 flex-shrink-0" />

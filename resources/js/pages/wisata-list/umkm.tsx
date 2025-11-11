@@ -21,7 +21,7 @@ interface UmkmIndexProps extends PageProps {
     categories: Category[];
     filters: {
         search?: string;
-        category?: string;
+        category?: number;
     }
 }
 
@@ -31,7 +31,7 @@ const cardVariants = { hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 
 export default function UmkmIndex() {
     const { umkms, categories, filters } = usePage<UmkmIndexProps>().props;
     const [searchTerm, setSearchTerm] = useState(filters.search || '');
-    const [selectedCategory, setSelectedCategory] = useState(filters.category || '');
+    const [selectedCategory, setSelectedCategory] = useState<number | ''>(filters.category || '');
     const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
     const isInitialMount = useRef(true);
     const [selectedUmkm, setSelectedUmkm] = useState<Umkm | null>(null);
@@ -83,9 +83,9 @@ export default function UmkmIndex() {
                                         {categories.map((category) => (
                                             <Button
                                                 key={category.id}
-                                                onClick={() => setSelectedCategory(category.slug)}
-                                                variant={selectedCategory === category.slug ? 'default' : 'outline'}
-                                                className={`justify-start w-full text-left ${selectedCategory === category.slug ? 'bg-amber-600 hover:bg-amber-700 text-white' : 'bg-white dark:bg-slate-800 border-stone-300 dark:border-slate-600'}`}
+                                                onClick={() => setSelectedCategory(category.id)}
+                                                variant={selectedCategory === category.id ? 'default' : 'outline'}
+                                                className={`justify-start w-full text-left ${selectedCategory === category.id ? 'bg-amber-600 hover:bg-amber-700 text-white' : 'bg-white dark:bg-slate-800 border-stone-300 dark:border-slate-600'}`}
                                             >
                                                 {category.name}
                                             </Button>

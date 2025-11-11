@@ -96,7 +96,7 @@ export function Navigation() {
     }`}>
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <img src="/logo-pmm.PNG" alt="Logo PMM" className="h-9 w-auto" />
+          <img src="/logodesa.png" alt="Logo Desa Sungai Deras" className="h-9 w-auto" />
           <h1 className={`text-xl font-bold transition-colors ${
               isScrolled ? 'text-primary' : 'text-white'
           }`}>Desa Sungai Deras</h1>
